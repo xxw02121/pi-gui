@@ -846,6 +846,85 @@
   border: 1px solid var(--code-border);
 }
 
+.message__code {
+  display: grid;
+  min-width: 0;
+  border: 1px solid var(--code-border);
+  border-radius: var(--radius-lg);
+  background: var(--code-block-bg);
+  overflow: hidden;
+}
+
+.message__code pre {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.message__code-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  padding: 4px 6px 4px 12px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.message__code-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  padding: 2px 8px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.message__code-copy:hover,
+.message__code-copy:focus-visible {
+  background: var(--overlay-subtle);
+  color: var(--text-strong);
+}
+
+.message__code-copy svg {
+  width: 14px;
+  height: 14px;
+}
+
+.message__mermaid {
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.message__mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.message__content .katex-display {
+  max-width: 100%;
+  margin: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.message__content .katex {
+  color: inherit;
+  font-size: 1.05em;
+}
+
 .message__content pre code {
   color: inherit;
   display: block;

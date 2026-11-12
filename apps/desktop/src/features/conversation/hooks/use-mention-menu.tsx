@@ -8,6 +8,7 @@ import {
   type RefObject,
 } from "react";
 import type { RuntimeExtensionRecord, RuntimeSnapshot } from "@pi-gui/session-driver/runtime-types";
+import { useTranslation, type Translate } from "../../../i18n";
 import { extensionSourceSummary } from "../../extensions/extension-display";
 import type { PiDesktopApi } from "../../../../contracts/ipc";
 import { nextMenuIndex } from "./use-slash-menu";
@@ -78,6 +79,7 @@ export function useMentionMenu({
   const [suppressed, setSuppressed] = useState(false);
   const composerDraftRef = useRef(composerDraft);
   composerDraftRef.current = composerDraft;
+  const { t } = useTranslation();
 
   // Fetch file list when workspace changes
   useEffect(() => {
@@ -134,6 +136,7 @@ export function useMentionMenu({
       runtime?.extensions ?? [],
       lowerQuery,
       pendingEnablePaths,
+      t,
     );
     const fileOptions = allFiles
       .filter((file) => file.toLowerCase().includes(lowerQuery))
@@ -145,7 +148,7 @@ export function useMentionMenu({
         filePath,
       }));
     return [...extensionOptions, ...fileOptions];
-  }, [allFiles, mentionMatch, pendingEnablePaths, runtime?.extensions]);
+  }, [allFiles, mentionMatch, pendingEnablePaths, runtime?.extensions, t]);
 
   const showMentionMenu = mentionOptions.length > 0;
 
@@ -278,12 +281,13 @@ function buildExtensionMentionOptions(
   extensions: readonly RuntimeExtensionRecord[],
   lowerQuery: string,
   pendingEnablePaths: ReadonlySet<string>,
+  t: Translate,
 ): MentionOption[] {
   return extensions
     .map((extension) => ({
       extension,
       insertText: extensionMentionText(extension),
-      description: describeExtension(extension),
+      description: describeExtension(extension, t),
       enabling: pendingEnablePaths.has(extension.path),
     }))
     .filter((option) => {
@@ -310,16 +314,18 @@ function buildExtensionMentionOptions(
     }));
 }
 
-function describeExtension(extension: RuntimeExtensionRecord): string {
+function describeExtension(extension: RuntimeExtensionRecord, t: Translate): string {
   if (extension.description) {
     return extension.description;
   }
 
   const contributionParts = [
     extension.commands.length > 0
-      ? pluralizeContribution(extension.commands.length, "command")
+      ? t("composer.mention.commands", { count: extension.commands.length })
       : undefined,
-    extension.tools.length > 0 ? pluralizeContribution(extension.tools.length, "tool") : undefined,
+    extension.tools.length > 0
+      ? t("composer.mention.tools", { count: extension.tools.length })
+      : undefined,
   ].filter(Boolean);
   if (contributionParts.length > 0) {
     return contributionParts.join(" · ");
@@ -375,8 +381,4 @@ function normalizeMentionText(value: string): string {
     .replace(/^@+/, "")
     .replace(/[/\\]+/g, "-")
     .replace(/\s+/g, "-");
-}
-
-function pluralizeContribution(count: number, label: string): string {
-  return `${count} ${label}${count === 1 ? "" : "s"}`;
 }

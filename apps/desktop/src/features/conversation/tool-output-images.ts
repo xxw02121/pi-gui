@@ -1,4 +1,5 @@
 import { isShownToolImageUrl, isToolImageBlock } from "../../../contracts/tool-output-images";
+import { translate, type Translate } from "../../i18n/translate";
 
 /** An image block that still carries data or a URL, wherever it sits in a tool's input or output. */
 function carriesImage(value: unknown): value is { type: "image"; mimeType?: unknown } {
@@ -24,7 +25,7 @@ export function toolOutputImages(output: unknown): readonly ToolOutputImage[] {
 }
 
 /** JSON for the expanded row and Copy, with each image shown as a short placeholder. */
-export function stringifyToolValue(value: unknown): string {
+export function stringifyToolValue(value: unknown, t: Translate = translate): string {
   return JSON.stringify(
     value,
     (_key, nested: unknown) =>
@@ -32,7 +33,12 @@ export function stringifyToolValue(value: unknown): string {
         ? {
             ...nested,
             src: undefined,
-            data: `[${typeof nested.mimeType === "string" ? nested.mimeType : "image"} image]`,
+            data: t("timeline.tool.imagePlaceholder", {
+              kind:
+                typeof nested.mimeType === "string"
+                  ? nested.mimeType
+                  : t("timeline.tool.imageKind"),
+            }),
           }
         : nested,
     2,

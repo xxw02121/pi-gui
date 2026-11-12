@@ -1,4 +1,5 @@
 import { useEffect, useState, type Dispatch, type KeyboardEvent, type SetStateAction } from "react";
+import { useTranslation } from "../../../i18n";
 import type { RuntimeCommandRecord, RuntimeSnapshot } from "@pi-gui/session-driver/runtime-types";
 import type {
   DesktopAppState,
@@ -131,6 +132,7 @@ export function useSlashMenu(params: UseSlashMenuParams): SlashMenuState {
     onSelectLoginProvider,
     onSelectLogoutProvider,
   } = params;
+  const { t } = useTranslation();
 
   const [slashIndex, setSlashIndex] = useState(0);
   const [slashOptionIndex, setSlashOptionIndex] = useState(0);
@@ -148,6 +150,7 @@ export function useSlashMenu(params: UseSlashMenuParams): SlashMenuState {
         {
           allowTreeCommand,
         },
+        t,
       )
     : [];
   const slashSuggestions = flattenSlashSections(slashSections);
@@ -167,10 +170,11 @@ export function useSlashMenu(params: UseSlashMenuParams): SlashMenuState {
   const slashOptions =
     activeSlashOptionCommand?.kind === "model"
       ? buildModelOptions(selectedModelRuntime)
-      : slashOptionsForCommand(activeSlashOptionCommand, selectedRuntime);
+      : slashOptionsForCommand(activeSlashOptionCommand, selectedRuntime, t);
   const activeSlashOptionEmptyState = slashOptionEmptyState(
     activeSlashOptionCommand,
     activeSlashOptionCommand?.kind === "model" ? undefined : selectedRuntime,
+    t,
   );
   const modelSlashEmptyState =
     activeSlashOptionCommand?.kind === "model" && slashOptions.length === 0

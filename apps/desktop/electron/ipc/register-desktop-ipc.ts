@@ -28,6 +28,7 @@ import type { DesktopExtensionViewOwner } from "../extensions/extension-view-own
 import { registerExtensionViewRequests } from "./extension-view-requests";
 import { registerReviewRequests, type ReviewRequestsOwner } from "./review-requests";
 import { mainFrameHandler } from "./main-frame-ipc";
+import { applyUiLocale } from "../ui-locale";
 import { assertComposerAttachmentPixels } from "./composer-attachment-pixels";
 import {
   expectAppView,
@@ -1079,6 +1080,9 @@ function registerTerminalIpc(windows: WindowOwner, capabilities: DesktopIpcCapab
   ipcMain.on(desktopIpc.terminalSetFocused, (event, rawFocused: unknown) => {
     const window = windows.windowForSender(event.sender);
     capabilities.setTerminalFocused(window.webContents.id, expectBoolean(rawFocused, "focused"));
+  });
+  ipcMain.on(desktopIpc.setUiLocale, (_event, rawLocale: unknown) => {
+    if (typeof rawLocale === "string") applyUiLocale(rawLocale);
   });
   ipcMain.on(desktopIpc.sidePanelSetFocused, (event, rawFocused: unknown) => {
     const window = windows.windowForSender(event.sender);

@@ -5,6 +5,7 @@ import {
   type TaskWorkbenchTemplate,
   type ToolRef,
 } from "../../../contracts/workbench";
+import { translate, type Translate } from "../../i18n/translate";
 import { EMPTY_FILE_TABS, openFile, openFileAtLine } from "./file-workbench-state";
 
 export interface WorkspaceFileReference {
@@ -47,11 +48,16 @@ export function restoreWorkbenchView(
   fallback: TaskWorkbenchTemplate,
   saved: TaskWorkbenchTemplate | null,
   pendingActions: readonly WorkbenchAction[],
+  t: Translate = translate,
 ): { readonly view: TaskWorkbenchTemplate; readonly error: string } {
-  return applyWorkbenchActions(saved ?? fallback, pendingActions);
+  return applyWorkbenchActions(saved ?? fallback, pendingActions, t);
 }
 
-function actionLimitError(view: TaskWorkbenchTemplate, action: WorkbenchAction): string {
+function actionLimitError(
+  view: TaskWorkbenchTemplate,
+  action: WorkbenchAction,
+  t: Translate,
+): string {
   if (
     (action.type === "set-files" && action.files.tabs.tabs.length > MAX_WORKBENCH_FILE_TABS) ||
     (action.type === "open-file" &&
@@ -59,14 +65,14 @@ function actionLimitError(view: TaskWorkbenchTemplate, action: WorkbenchAction):
       view.files.tabs.tabs.length >= MAX_WORKBENCH_FILE_TABS &&
       !view.files.tabs.tabs.includes(action.file.path))
   ) {
-    return `You have ${MAX_WORKBENCH_FILE_TABS} file tabs open. Close a file tab before opening another.`;
+    return t("workbench.tabs.fileLimit", { count: MAX_WORKBENCH_FILE_TABS });
   }
   if (
     action.type === "open-tool" &&
     view.tools.length >= MAX_WORKBENCH_TOOLS &&
     !view.tools.some((tool) => toolRefId(tool) === toolRefId(action.tool))
   ) {
-    return "Close a tool tab before opening another.";
+    return t("workbench.tabs.toolLimit");
   }
   return "";
 }
@@ -74,11 +80,12 @@ function actionLimitError(view: TaskWorkbenchTemplate, action: WorkbenchAction):
 export function applyWorkbenchActions(
   initial: TaskWorkbenchTemplate,
   actions: readonly WorkbenchAction[],
+  t: Translate = translate,
 ): { readonly view: TaskWorkbenchTemplate; readonly error: string } {
   let view = initial;
   let error = "";
   for (const action of actions) {
-    const limitError = actionLimitError(view, action);
+    const limitError = actionLimitError(view, action, t);
     if (limitError) error = limitError;
     else view = reduceWorkbench(view, action);
   }
@@ -90,7 +97,7 @@ export function reduceWorkbench(
   view: TaskWorkbenchTemplate,
   action: WorkbenchAction,
 ): TaskWorkbenchTemplate {
-  if (actionLimitError(view, action)) return view;
+  if (actionLimitError(view, action, translate)) return view;
   switch (action.type) {
     case "open-tool": {
       const toolId = toolRefId(action.tool);

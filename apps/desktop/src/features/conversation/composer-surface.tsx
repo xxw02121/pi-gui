@@ -17,6 +17,7 @@ import type {
 } from "./composer-commands";
 import { hasFilesInDataTransfer } from "./composer-attachments";
 import { ExtensionDock, type ExtensionDockModel } from "../extensions/extension-session-ui";
+import { useTranslation } from "../../i18n";
 import {
   ExtensionIcon,
   FileIcon,
@@ -128,6 +129,7 @@ export function ComposerSurface({
   footer,
   annotationChip,
 }: ComposerSurfaceProps) {
+  const { t } = useTranslation();
   const [isDragActive, setIsDragActive] = useState(false);
   const dragDepthRef = useRef(0);
 
@@ -183,7 +185,7 @@ export function ComposerSurface({
     >
       {isDragActive ? (
         <div className="composer__drop-indicator" data-testid="composer-drop-indicator">
-          Drop images or files to attach
+          {t("composer.drop")}
         </div>
       ) : null}
       {activeSlashCommand ? (
@@ -198,7 +200,7 @@ export function ComposerSurface({
             ) : null}
           </span>
           <button
-            aria-label={`Clear ${activeSlashCommand.title}`}
+            aria-label={t("composer.clearSlash", { title: activeSlashCommand.title })}
             className="composer__slash-intent-clear"
             type="button"
             onClick={onClearSlashCommand}
@@ -238,7 +240,7 @@ export function ComposerSurface({
                 </>
               )}
               <button
-                aria-label={`Remove ${attachment.name}`}
+                aria-label={t("composer.removeAttachment", { name: attachment.name })}
                 className="composer-attachment__remove"
                 type="button"
                 onClick={() => onRemoveAttachment(attachment.id)}
@@ -322,7 +324,7 @@ export function ComposerSurface({
                               ) : null}
                               {command.compatibility?.status === "terminal-only" ? (
                                 <span className="slash-menu__skill-badge slash-menu__skill-badge--warning">
-                                  Terminal-only
+                                  {t("composer.slash.terminalOnly")}
                                 </span>
                               ) : null}
                             </span>
@@ -414,12 +416,13 @@ function MentionMenuSections({
   const fileOptions = options.filter(
     (option): option is FileMentionOption => option.kind === "file",
   );
+  const { t } = useTranslation();
 
   return (
     <>
       {extensionOptions.length > 0 ? (
         <MentionMenuSection
-          title="Extensions"
+          title={t("composer.mention.extensions")}
           options={extensionOptions}
           selectedIndex={selectedIndex}
           allOptions={options}
@@ -429,7 +432,7 @@ function MentionMenuSections({
       ) : null}
       {fileOptions.length > 0 ? (
         <MentionMenuSection
-          title="Files"
+          title={t("composer.mention.files")}
           options={fileOptions}
           selectedIndex={selectedIndex}
           allOptions={options}
@@ -483,6 +486,7 @@ function MentionMenuItem({
   readonly onSelect: (option: MentionOption) => void;
   readonly onEnableExtension: (option: ExtensionMentionOption) => void;
 }) {
+  const { t } = useTranslation();
   if (option.kind === "extension") {
     return (
       <div
@@ -508,7 +512,9 @@ function MentionMenuItem({
               <span className="mention-menu__filename">{option.displayName}</span>
               {option.enabled ? null : (
                 <span className="mention-menu__badge">
-                  {option.enabling ? "Enabling" : "Disabled"}
+                  {option.enabling
+                    ? t("composer.mention.enabling")
+                    : t("composer.mention.disabled")}
                 </span>
               )}
             </span>
@@ -517,13 +523,13 @@ function MentionMenuItem({
         </button>
         {option.enabled ? null : (
           <button
-            aria-label={`Enable ${option.displayName}`}
+            aria-label={t("composer.mention.enableNamed", { name: option.displayName })}
             className="mention-menu__enable"
             disabled={option.enabling}
             type="button"
             onClick={() => onEnableExtension(option)}
           >
-            {option.enabling ? "Enabling" : "Enable"}
+            {option.enabling ? t("composer.mention.enabling") : t("composer.mention.enable")}
           </button>
         )}
       </div>

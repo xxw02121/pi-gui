@@ -1,3 +1,4 @@
+import { useTranslation } from "../../i18n";
 import { CheckIcon, ChevronDownIcon } from "../../ui/icons";
 import { EditorIcon, hasEditorIcon } from "../../ui/editor-icons";
 import type { OpenInEditorState } from "./hooks/use-open-in-editor";
@@ -8,12 +9,13 @@ interface OpenInEditorButtonProps {
 }
 
 export function OpenInEditorButton({ state, onOpenFolder }: OpenInEditorButtonProps) {
-  const displayLabel = state.loading ? "…" : (state.targetLabel ?? "Folder");
+  const { t } = useTranslation();
+  const displayLabel = state.loading ? "…" : (state.targetLabel ?? t("threads.editorFolder"));
   const label = state.loading
-    ? "Looking for editors…"
+    ? t("threads.editorLooking")
     : state.targetLabel
-      ? `Open in ${state.targetLabel}`
-      : "Open this project in the file manager";
+      ? t("threads.editorOpenIn", { name: state.targetLabel })
+      : t("threads.editorOpenInFolder");
 
   return (
     <div className="open-in-editor" ref={state.wrapRef}>
@@ -37,10 +39,10 @@ export function OpenInEditorButton({ state, onOpenFolder }: OpenInEditorButtonPr
       <button
         aria-expanded={state.menuOpen}
         aria-haspopup="menu"
-        aria-label="Choose editor"
+        aria-label={t("threads.editorChoose")}
         className="open-in-editor__trigger"
         data-testid="open-in-editor-menu-trigger"
-        title="Choose editor"
+        title={t("threads.editorChoose")}
         type="button"
         onClick={state.toggleMenu}
       >
@@ -50,11 +52,11 @@ export function OpenInEditorButton({ state, onOpenFolder }: OpenInEditorButtonPr
         <div className="open-in-editor__menu" data-testid="open-in-editor-menu" role="menu">
           {state.loading ? (
             <p className="open-in-editor__empty" data-testid="open-in-editor-loading">
-              Looking for editors…
+              {t("threads.editorLooking")}
             </p>
           ) : state.editors.length === 0 ? (
             <p className="open-in-editor__empty" data-testid="open-in-editor-empty">
-              No supported editor found on this computer.
+              {t("threads.editorNone")}
             </p>
           ) : (
             state.editors.map((editor) => (
@@ -95,7 +97,7 @@ export function OpenInEditorButton({ state, onOpenFolder }: OpenInEditorButtonPr
                 onOpenFolder();
               }}
             >
-              <span className="open-in-editor__item-label">Open folder</span>
+              <span className="open-in-editor__item-label">{t("threads.editorOpenFolder")}</span>
             </button>
           ) : null}
           {state.error ? <p className="open-in-editor__error">{state.error}</p> : null}

@@ -66,15 +66,30 @@ function variableName(tag) {
   );
 }
 
+function fragmentEntries(suffix) {
+  const directory = path.join(i18nDirectory, "messages", "fragments");
+  if (!existsSync(directory)) return [];
+  return readdirSync(directory)
+    .filter((name) => name.endsWith(suffix))
+    .sort()
+    .flatMap((name) => readEntries(readFileSync(path.join(directory, name), "utf8")));
+}
+
+function englishEntries() {
+  return [...readEntries(readFileSync(englishPath, "utf8")), ...fragmentEntries(".en.ts")];
+}
+
 function reportUntranslated(tag) {
   const messagesPath = path.join(i18nDirectory, "messages", `${tag}.ts`);
   if (!existsSync(messagesPath)) {
     fail(`No catalog for "${tag}" at ${messagesPath}.`);
     return;
   }
-  const english = readEntries(readFileSync(englishPath, "utf8"));
+  const english = englishEntries();
   const translated = new Map(
-    readEntries(readFileSync(messagesPath, "utf8")).map((entry) => [entry.key, entry.copy]),
+    [...readEntries(readFileSync(messagesPath, "utf8")), ...fragmentEntries(`.${tag}.ts`)].map(
+      (entry) => [entry.key, entry.copy],
+    ),
   );
   // Plural variants (`key_one`, …) are optional per language, since the plain key
   // covers every count. A variant still holding English copy is reported, though:
@@ -126,7 +141,7 @@ function createLocale(tag, label) {
     return;
   }
 
-  const english = readEntries(readFileSync(englishPath, "utf8"));
+  const english = englishEntries();
   if (english.length === 0) {
     fail(`Could not read any messages from ${englishPath}.`);
     return;

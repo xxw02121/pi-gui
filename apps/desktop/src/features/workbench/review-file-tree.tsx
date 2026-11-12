@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReviewFileEntry, ReviewFileStatus } from "../../../contracts/review";
+import { useTranslation, type Translate } from "../../i18n";
 import { ChevronDownIcon, ChevronRightIcon, MinusIcon, PlusIcon, SearchIcon } from "../../ui/icons";
 import { buildFileTree, filterWorkspaceFiles, type FileTreeNode } from "./file-tree";
 
@@ -28,6 +29,7 @@ export function ReviewFileTree({
   onToggleReviewed,
   onStage,
 }: ReviewFileTreeProps) {
+  const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set());
   const listRef = useRef<HTMLDivElement | null>(null);
@@ -107,8 +109,8 @@ export function ReviewFileTree({
               <button
                 className="icon-button review-tree__stage"
                 type="button"
-                aria-label="Unstage"
-                title="Unstage file"
+                aria-label={t("workbench.review.unstage")}
+                title={t("workbench.review.unstageFile")}
                 disabled={busy || stale || file.conflicted}
                 onClick={() => onStage(file, "unstage")}
               >
@@ -119,8 +121,8 @@ export function ReviewFileTree({
               <button
                 className="icon-button review-tree__stage"
                 type="button"
-                aria-label="Stage"
-                title="Stage file"
+                aria-label={t("workbench.review.stage")}
+                title={t("workbench.review.stageFile")}
                 disabled={busy || stale || file.conflicted}
                 onClick={() => onStage(file, "stage")}
               >
@@ -130,7 +132,7 @@ export function ReviewFileTree({
           </span>
         ) : null}
         <input
-          aria-label={`Mark ${file.path} reviewed`}
+          aria-label={t("workbench.review.markReviewed", { path: file.path })}
           className="diff-panel__reviewed-checkbox"
           data-testid={`diff-panel-reviewed-${file.path}`}
           type="checkbox"
@@ -140,7 +142,7 @@ export function ReviewFileTree({
         />
         <span
           className={`review-tree__status review-tree__status--${file.conflicted ? "conflicted" : file.status}`}
-          title={file.conflicted ? "Conflicted" : file.status}
+          title={reviewStatusTitle(file.conflicted ? "conflicted" : file.status, t)}
         >
           {statusLetter(file.conflicted ? "conflicted" : file.status)}
         </span>
@@ -149,26 +151,29 @@ export function ReviewFileTree({
   };
 
   return (
-    <section className="review-tree" aria-label="Changed files">
+    <section className="review-tree" aria-label={t("workbench.review.changedFiles")}>
       <div className="review-tree__header">
         <label className="review-tree__filter">
           <SearchIcon />
           <input
-            aria-label="Filter changed files"
-            placeholder="Filter files…"
+            aria-label={t("workbench.review.filterChangedFiles")}
+            placeholder={t("workbench.review.filterFilesPlaceholder")}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
           />
         </label>
         <span className="review-tree__counter" data-testid="diff-panel-counter">
-          Reviewed {reviewedCount} of {files.length}
+          {t("workbench.review.reviewedCount", {
+            reviewed: reviewedCount,
+            total: files.length,
+          })}
         </span>
       </div>
       <div className="review-tree__list diff-panel__file-list" ref={listRef}>
         {tree.length ? (
           tree.map((node) => renderNode(node, 0))
         ) : (
-          <div className="diff-panel__empty">No files match.</div>
+          <div className="diff-panel__empty">{t("workbench.review.noFilesMatch")}</div>
         )}
       </div>
     </section>
@@ -186,6 +191,27 @@ export function reviewTreeOrder(files: readonly ReviewFileEntry[]): readonly str
   };
   walk(buildFileTree(files.map((file) => file.path)));
   return order;
+}
+
+function reviewStatusTitle(status: ReviewFileStatus, t: Translate): string {
+  switch (status) {
+    case "added":
+      return t("workbench.review.status.added");
+    case "copied":
+      return t("workbench.review.status.copied");
+    case "deleted":
+      return t("workbench.review.status.deleted");
+    case "renamed":
+      return t("workbench.review.status.renamed");
+    case "untracked":
+      return t("workbench.review.status.untracked");
+    case "conflicted":
+      return t("workbench.review.status.conflicted");
+    case "typechanged":
+      return t("workbench.review.status.typechanged");
+    case "modified":
+      return t("workbench.review.status.modified");
+  }
 }
 
 function statusLetter(status: ReviewFileStatus): string {

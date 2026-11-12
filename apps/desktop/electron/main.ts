@@ -38,6 +38,7 @@ import { performExtensionViewHostAction } from "./extensions/extension-view-acti
 import { extensionFrameDocument } from "./extensions/extension-frame-document";
 import { ReviewOwner } from "./workbench/review-owner";
 import { registerDesktopIpc } from "./ipc/register-desktop-ipc";
+import { onUiLocaleChanged, uiText } from "./ui-locale";
 import {
   createOrchestrationRuntimeExtension,
   createOrchestrationRuntimeTools,
@@ -360,12 +361,12 @@ function openMcpSignInUrl(url: string): void {
     console.error(
       `Refusing to open an MCP sign-in URL${parsed ? ` on ${parsed.origin}` : " that is not http or https"}`,
     );
-    showMcpSignInUrl(url, "pi-gui opens only https links, or http links on this computer.");
+    showMcpSignInUrl(url, uiText("dialog.mcpSignIn.httpsOnly"));
     return;
   }
   shell.openExternal(parsed.toString()).catch((error: unknown) => {
     console.error(`Failed to open an MCP sign-in URL on ${parsed.origin}`, error);
-    showMcpSignInUrl(parsed.toString(), "pi-gui could not open your browser.");
+    showMcpSignInUrl(parsed.toString(), uiText("dialog.mcpSignIn.browserFailed"));
   });
 }
 
@@ -375,9 +376,9 @@ function showMcpSignInUrl(url: string, reason: string): void {
   const options: MessageBoxOptions = {
     type: "warning",
     title: "pi-gui",
-    message: "Open this MCP sign-in link yourself",
-    detail: `${reason} Check the link before you open it:\n\n${url}`,
-    buttons: ["Copy link", "Close"],
+    message: uiText("dialog.mcpSignIn.message"),
+    detail: uiText("dialog.mcpSignIn.detail", { reason, url }),
+    buttons: [uiText("dialog.mcpSignIn.copy"), uiText("dialog.mcpSignIn.close")],
     defaultId: 0,
     cancelId: 1,
   };
@@ -734,11 +735,11 @@ async function pickWorkspacePathViaDialog(
   const result = window
     ? await dialog.showOpenDialog(window, {
         properties: ["openDirectory"],
-        title: "Open workspace folder",
+        title: uiText("dialog.openFolder"),
       })
     : await dialog.showOpenDialog({
         properties: ["openDirectory"],
-        title: "Open workspace folder",
+        title: uiText("dialog.openFolder"),
       });
   if (result.canceled || result.filePaths.length === 0) {
     return undefined;
@@ -787,9 +788,9 @@ async function runManualUpdateCheck(): Promise<void> {
       const choice = await showDialog({
         type: "info",
         title: "pi-gui",
-        message: `Version ${result.latestVersion} is available.`,
-        detail: `You have ${result.currentVersion}.`,
-        buttons: ["Download", "Later"],
+        message: uiText("dialog.update.available", { version: result.latestVersion }),
+        detail: uiText("dialog.update.haveVersion", { version: result.currentVersion }),
+        buttons: [uiText("dialog.update.download"), uiText("dialog.update.later")],
         defaultId: 0,
         cancelId: 1,
       });
@@ -803,8 +804,8 @@ async function runManualUpdateCheck(): Promise<void> {
       await showDialog({
         type: "info",
         title: "pi-gui",
-        message: `You're up to date on version ${result.currentVersion}.`,
-        buttons: ["OK"],
+        message: uiText("dialog.update.upToDate", { version: result.currentVersion }),
+        buttons: [uiText("dialog.ok")],
       });
       return;
     }
@@ -812,18 +813,18 @@ async function runManualUpdateCheck(): Promise<void> {
     await showDialog({
       type: "warning",
       title: "pi-gui",
-      message: "Could not check for updates right now.",
+      message: uiText("dialog.update.failed"),
       detail: result.message,
-      buttons: ["OK"],
+      buttons: [uiText("dialog.ok")],
     });
   } catch (error) {
     console.error("pi-gui: manual update check failed:", error);
     await showDialog({
       type: "warning",
       title: "pi-gui",
-      message: "Could not check for updates right now.",
+      message: uiText("dialog.update.failed"),
       detail: error instanceof Error ? error.message : String(error),
-      buttons: ["OK"],
+      buttons: [uiText("dialog.ok")],
     }).catch(() => undefined);
   }
 }
@@ -841,7 +842,7 @@ function installApplicationMenu(): void {
         { type: "separator" },
         {
           id: CHECK_FOR_UPDATES_MENU_ITEM_ID,
-          label: "Check for Updates…",
+          label: uiText("menu.checkForUpdates"),
           click: () => {
             void runManualUpdateCheck().catch((error: unknown) => {
               console.error("[main] runManualUpdateCheck failed", error);
@@ -859,10 +860,10 @@ function installApplicationMenu(): void {
       ],
     },
     {
-      label: "File",
+      label: uiText("menu.file"),
       submenu: [
         {
-          label: "New Thread",
+          label: uiText("menu.file.newThread"),
           accelerator: "CommandOrControl+N",
           click: () => {
             const window = BrowserWindow.getFocusedWindow() ?? mainWindow;
@@ -871,7 +872,7 @@ function installApplicationMenu(): void {
         },
         {
           id: NEW_WINDOW_MENU_ITEM_ID,
-          label: "New Window",
+          label: uiText("menu.file.newWindow"),
           accelerator: "CommandOrControl+Shift+N",
           click: () => {
             createAppWindow(windowOwner.foregroundView());
@@ -880,7 +881,7 @@ function installApplicationMenu(): void {
         { type: "separator" },
         {
           id: OPEN_FOLDER_MENU_ITEM_ID,
-          label: "Open Folder…",
+          label: uiText("menu.file.openFolder"),
           accelerator: "Command+O",
           click: () => {
             void pickWorkspaceViaDialog(mainWindow).catch((error: unknown) => {
@@ -894,16 +895,16 @@ function installApplicationMenu(): void {
     },
     { role: "editMenu" },
     {
-      label: "View",
+      label: uiText("menu.view"),
       submenu: [
         // Cmd+R toggles Review and Shift+Cmd+R renames the thread, so neither
         // reload has a shortcut.
         {
-          label: "Reload",
+          label: uiText("menu.view.reload"),
           click: () => BrowserWindow.getFocusedWindow()?.webContents.reload(),
         },
         {
-          label: "Force Reload",
+          label: uiText("menu.view.forceReload"),
           click: () => BrowserWindow.getFocusedWindow()?.webContents.reloadIgnoringCache(),
         },
         { role: "toggleDevTools" },
@@ -1082,6 +1083,7 @@ app
         terminalService?.retainWorkspacePaths(workspacePaths);
       }
     });
+    onUiLocaleChanged(() => installApplicationMenu());
     installApplicationMenu();
     if (process.env.PI_APP_TEST_MODE) {
       Object.assign(globalThis, {
@@ -1219,11 +1221,11 @@ app
           const result = parent
             ? await dialog.showOpenDialog(parent, {
                 properties: ["openFile", "multiSelections"],
-                title: "Attach files",
+                title: uiText("dialog.attachFiles"),
               })
             : await dialog.showOpenDialog({
                 properties: ["openFile", "multiSelections"],
-                title: "Attach files",
+                title: uiText("dialog.attachFiles"),
               });
           if (result.canceled || result.filePaths.length === 0) {
             return undefined;

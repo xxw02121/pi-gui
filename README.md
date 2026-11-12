@@ -111,6 +111,46 @@ out and update from the Releases page.
 
 Building from source is for contributors; see [Development](#development).
 
+## 简体中文
+
+这个分支的界面默认是简体中文。设置 → 外观 → 语言里可以改回 English，或改为跟随系统语言。模型回复和 Pi 的系统提示不会被翻译，Pi 本身的默认提示保持原样。
+
+配置目录与上游相同，仍是 `~/.pi/agent`（包括自定义提供方的 `models.json`）。已有的 pi CLI 登录、模型和会话可以直接用。
+
+### 在 Apple Silicon Mac 上本地打包
+
+需要 Node.js 22.19 或更新版本，以及 pnpm（可用 `corepack`）。在仓库根目录执行：
+
+```bash
+corepack enable
+pnpm install
+pnpm --filter @pi-gui/desktop run package
+```
+
+`package` 会按 `apps/desktop/electron-builder.yml` 打出 **macOS arm64** 的应用和磁盘映像：
+
+- 应用：`apps/desktop/release/mac-arm64/pi-gui.app`
+- 磁盘映像：`apps/desktop/release/pi-gui-<版本>-arm64.dmg`
+
+只要 `.app`、不要 dmg 时，用 `pnpm --filter @pi-gui/desktop run package:dir`。
+
+没有 Apple 开发者证书时，electron-builder 会做 ad-hoc 签名，Gatekeeper 仍可能拦截。把应用拖进「应用程序」后，在终端执行：
+
+```bash
+xattr -cr /Applications/pi-gui.app
+```
+
+然后即可打开。`xattr -cr` 会去掉隔离属性（quarantine），只应对你自己构建的这份应用使用。
+
+### 用 GitHub Actions 产出 arm64 安装包
+
+仓库里的 Release 工作流仍要求 Apple 签名和公证密钥；没有这些密钥时它会失败。另有工作流 [macOS arm64 (unsigned)](.github/workflows/macos-arm64-unsigned.yml)，在 `macos-latest`（Apple Silicon）上构建**未签名**的 arm64 `.dmg` / `.zip` / `.app`，并上传为 Actions artifact：
+
+- 在 GitHub 的 Actions 页面手动运行 “macOS arm64 (unsigned)”
+- 或推送 `v*` 标签（例如 `v1.0.2`），该工作流会和 Release 一起触发
+
+下载 artifact 后同样用 `xattr -cr` 去掉隔离属性再打开。未签名包不会通过公证。
+
 ## Quickstart
 
 1. Install pi-gui and open it.

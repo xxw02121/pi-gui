@@ -2,13 +2,14 @@ import type {
   RuntimeExtensionRecord,
   RuntimeSourceScope,
 } from "@pi-gui/session-driver/runtime-types";
+import { translate, type Translate } from "../../i18n/translate";
 
-export function extensionSourceSummary(extension: RuntimeExtensionRecord): string {
-  return `${extensionScopeLabel(extension)} · ${extension.sourceInfo.origin}`;
+export function extensionSourceSummary(
+  extension: RuntimeExtensionRecord,
+  t: Translate = translate,
+): string {
+  return `${extensionScopeLabel(extension, t)} · ${extension.sourceInfo.origin}`;
 }
-
-export const PI_GUI_TOOLS_LABEL = "pi-gui tools";
-export const PI_ADDONS_LABEL = "Built into pi";
 
 /** Extensions pi-gui itself adds to every session; switched on and off app-wide. */
 export function isPiGuiBuiltinExtension(extension: RuntimeExtensionRecord): boolean {
@@ -27,26 +28,32 @@ export function isPiAddonExtension(extension: RuntimeExtensionRecord): boolean {
   return extension.sourceInfo.source === "builtin" && extension.path.startsWith("builtin:");
 }
 
-export function extensionScopeLabel(extension: RuntimeExtensionRecord): string {
-  if (isPiGuiBuiltinExtension(extension)) return PI_GUI_TOOLS_LABEL;
-  if (isPiAddonExtension(extension)) return PI_ADDONS_LABEL;
+export function extensionScopeLabel(
+  extension: RuntimeExtensionRecord,
+  t: Translate = translate,
+): string {
+  if (isPiGuiBuiltinExtension(extension)) return t("extensions.scope.piGuiTools");
+  if (isPiAddonExtension(extension)) return t("extensions.scope.piAddons");
   return extension.sourceInfo.scope;
 }
 
 /** Group heading for where a skill or extension was discovered. */
-export function sourceScopeGroupLabel(scope: RuntimeSourceScope): string {
+export function sourceScopeGroupLabel(scope: RuntimeSourceScope, t: Translate = translate): string {
   switch (scope) {
     case "project":
-      return "Workspace";
+      return t("extensions.scope.workspace");
     case "user":
-      return "User";
+      return t("extensions.scope.user");
     case "temporary":
-      return "This session";
+      return t("extensions.scope.session");
   }
 }
 
-export function extensionGroupLabel(extension: RuntimeExtensionRecord): string {
-  if (isPiGuiBuiltinExtension(extension)) return PI_GUI_TOOLS_LABEL;
-  if (isPiAddonExtension(extension)) return PI_ADDONS_LABEL;
-  return sourceScopeGroupLabel(extension.sourceInfo.scope);
+export function extensionGroupLabel(
+  extension: RuntimeExtensionRecord,
+  t: Translate = translate,
+): string {
+  if (isPiGuiBuiltinExtension(extension)) return t("extensions.scope.piGuiTools");
+  if (isPiAddonExtension(extension)) return t("extensions.scope.piAddons");
+  return sourceScopeGroupLabel(extension.sourceInfo.scope, t);
 }

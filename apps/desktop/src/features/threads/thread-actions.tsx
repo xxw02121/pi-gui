@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import type { Translate } from "../../i18n";
+import { translate } from "../../i18n/translate";
 import type { SessionRecord } from "../../../contracts/desktop-state";
 import { formatShortcut } from "../../../contracts/ipc";
 import {
@@ -62,6 +64,7 @@ export function archiveThreadShortcut(platform: NodeJS.Platform): string {
 export function buildThreadActions(
   subject: ThreadActionSubject,
   handlers: ThreadActionHandlers,
+  t: Translate = translate,
 ): readonly ThreadAction[] {
   const { session } = subject;
   const archived = Boolean(session.archivedAt);
@@ -69,7 +72,7 @@ export function buildThreadActions(
   const actions: ThreadAction[] = [
     {
       id: "rename-thread",
-      title: "Rename thread",
+      title: t("threads.rename"),
       icon: <PencilIcon />,
       hint: renameThreadShortcut(handlers.platform),
       run: () => handlers.startRename(subject),
@@ -78,7 +81,7 @@ export function buildThreadActions(
   if (archived) {
     actions.push({
       id: "restore-thread",
-      title: "Restore thread",
+      title: t("threads.restore"),
       icon: <RestoreIcon />,
       run: () => handlers.restore(subject),
     });
@@ -86,13 +89,13 @@ export function buildThreadActions(
     actions.push(
       {
         id: "pin-thread",
-        title: pinned ? "Unpin thread" : "Pin thread",
+        title: t(pinned ? "threads.unpin" : "threads.pin"),
         icon: <PinIcon filled={pinned} />,
         run: () => handlers.setPinned(subject, !pinned),
       },
       {
         id: "archive-thread",
-        title: "Archive thread",
+        title: t("threads.archive"),
         icon: <ArchiveIcon />,
         hint: archiveThreadShortcut(handlers.platform),
         run: () => handlers.archive(subject),
@@ -102,7 +105,7 @@ export function buildThreadActions(
   if (session.hasUnseenUpdate) {
     actions.push({
       id: "mark-read",
-      title: "Mark as read",
+      title: t("threads.markRead"),
       icon: <CheckIcon />,
       run: () => handlers.markRead(subject),
     });
@@ -110,13 +113,15 @@ export function buildThreadActions(
   actions.push(
     {
       id: "scheduled-task",
-      title: handlers.hasScheduledTask(subject) ? "Edit scheduled task…" : "Add scheduled task…",
+      title: t(
+        handlers.hasScheduledTask(subject) ? "threads.editScheduled" : "threads.addScheduled",
+      ),
       icon: <ClockIcon />,
       run: () => handlers.openScheduledTask(subject),
     },
     {
       id: "copy-session-id",
-      title: "Copy session ID",
+      title: t("threads.copySessionId"),
       icon: <CopyIcon />,
       run: () => handlers.copySessionId(subject),
     },

@@ -8,6 +8,7 @@ import {
 } from "react";
 import type { DesktopAppState, WorkspaceSessionTarget } from "../../../../contracts/desktop-state";
 import type { PiDesktopApi } from "../../../../contracts/ipc";
+import { useTranslation } from "../../../i18n";
 import {
   nonCompletedBindingForSession,
   type ScheduledTaskRecord,
@@ -69,6 +70,7 @@ export function useThreadActions({
   openScheduledEditor,
   flushComposerDraft,
 }: UseThreadActionsParams): ThreadMenuState {
+  const { t } = useTranslation();
   const [openMenu, setOpenMenu] = useState<OpenThreadMenu | null>(null);
   const [renameSessionId, setRenameSessionId] = useState<string | null>(null);
   const [renameDraft, setRenameDraft] = useState("");
@@ -185,7 +187,7 @@ export function useThreadActions({
       setRenameDraft("");
     },
     actionsFor: (subject) =>
-      buildThreadActions(subject, handlers).map((action) => ({
+      buildThreadActions(subject, handlers, t).map((action) => ({
         ...action,
         run: () => {
           setOpenMenu(null);

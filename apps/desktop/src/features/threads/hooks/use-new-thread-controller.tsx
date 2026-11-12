@@ -35,6 +35,7 @@ import type { SettingsSection } from "../../settings/settings-view";
 import { useMentionMenu } from "../../conversation/hooks/use-mention-menu";
 import { useSlashMenu } from "../../conversation/hooks/use-slash-menu";
 import { resolveRepoWorkspaceId } from "../../../../contracts/workspace-roots";
+import { useTranslation } from "../../../i18n";
 
 interface UseNewThreadControllerParams {
   readonly api: PiDesktopApi | undefined;
@@ -61,6 +62,7 @@ export function useNewThreadController(params: UseNewThreadControllerParams) {
     flushComposerDraft,
   } = params;
 
+  const { t } = useTranslation();
   const [pendingWorkspaceId, setPendingWorkspaceId] = useState("");
   const [rootWorkspaceId, setRootWorkspaceId] = useState("");
   const [environment, setEnvironment] = useState<NewThreadEnvironment>("local");
@@ -301,7 +303,7 @@ export function useNewThreadController(params: UseNewThreadControllerParams) {
       return;
     }
     if (treeCommand?.type === "tree") {
-      setComposerError("/tree is only available inside an existing session.");
+      setComposerError(t("threads.treeOnlyInSession"));
       return;
     }
     const input: StartThreadInput = {
@@ -348,6 +350,7 @@ export function useNewThreadController(params: UseNewThreadControllerParams) {
     resolvedThinkingLevel,
     rootWorkspaceId,
     setSnapshot,
+    t,
   ]);
 
   const handleComposerPaste = useCallback(

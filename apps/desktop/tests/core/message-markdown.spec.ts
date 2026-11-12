@@ -27,6 +27,19 @@ const markdownResponse = [
   "```",
   "",
   "Open the [issue](https://github.com/minghinmatthewlam/pi-gui/issues/19).",
+  "",
+  "Chemistry $\\text{ZnSO}_4$ and a fraction $\\frac{1}{2}$.",
+  "",
+  "$$",
+  "\\int_0^1 x^2 \\, dx",
+  "$$",
+  "",
+  "A price of $5 and $10 stays text.",
+  "",
+  "```mermaid",
+  "graph TD",
+  "  A-->B",
+  "```",
 ].join("\n");
 
 const tableResponse = [
@@ -95,9 +108,15 @@ test("renders markdown formatting in assistant responses", async () => {
       "First numbered item",
       "Second numbered item",
     ]);
-    await expect(messageRow.locator("pre code")).toContainText(
+    await expect(messageRow.locator("pre code", { hasText: "const rendered" })).toContainText(
       'const rendered: string = "markdown";',
     );
+    await expect(messageRow.locator(".katex").first()).toBeVisible();
+    await expect(messageRow.locator(".katex-display")).toBeVisible();
+    await expect(messageRow).toContainText("ZnSO");
+    await expect(messageRow).toContainText("$5 and $10");
+    await expect(messageRow.getByRole("button", { name: "Copy code" }).first()).toBeVisible();
+    await expect(messageRow.locator(".message__mermaid svg")).toBeVisible({ timeout: 15_000 });
 
     const issueLink = messageRow.getByRole("link", { name: "issue" });
     await expect(issueLink).toHaveAttribute(

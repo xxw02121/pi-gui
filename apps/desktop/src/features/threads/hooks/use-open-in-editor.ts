@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import type { DesktopEditorDescriptor, DesktopEditorList } from "../../../../contracts/editors";
 import type { PiDesktopApi } from "../../../../contracts/ipc";
+import { useTranslation } from "../../../i18n";
 
 interface UseOpenInEditorParams {
   readonly api: PiDesktopApi | undefined;
@@ -30,6 +31,7 @@ export interface OpenInEditorState {
  * list comes from main, so this never decides on its own which IDEs exist.
  */
 export function useOpenInEditor(params: UseOpenInEditorParams): OpenInEditorState {
+  const { t } = useTranslation();
   const { api, workspaceId, onOpenFolder } = params;
   const [list, setList] = useState<DesktopEditorList>({ editors: [] });
   const [menuOpen, setMenuOpen] = useState(false);
@@ -114,7 +116,7 @@ export function useOpenInEditor(params: UseOpenInEditorParams): OpenInEditorStat
       })
       .catch((cause: unknown) => {
         console.error("[renderer] openWorkspaceInEditor failed", cause);
-        setError("Could not open that editor. Try another one.");
+        setError(t("threads.editorOpenFailed"));
         // Keep the menu open so the failure is visible, and re-request the
         // list because main just dropped its cache after the failed launch.
         setMenuOpen(true);
@@ -130,7 +132,7 @@ export function useOpenInEditor(params: UseOpenInEditorParams): OpenInEditorStat
       .finally(() => {
         setBusy(false);
       });
-  }, [api, busy, list.editors, list.preferredEditorId, loading, onOpenFolder, workspaceId]);
+  }, [api, busy, list.editors, list.preferredEditorId, loading, onOpenFolder, t, workspaceId]);
 
   /**
    * Chooses which editor the main button targets. Selection never launches:
@@ -153,7 +155,7 @@ export function useOpenInEditor(params: UseOpenInEditorParams): OpenInEditorStat
           console.error("[renderer] setPreferredEditor failed", cause);
           // Keep the menu open so the failure is visible, and re-request the
           // list in case main re-probed and the editor is gone.
-          setError("Could not select that editor. Try another one.");
+          setError(t("threads.editorSelectFailed"));
           void api
             .listEditors()
             .then((refreshed) => {
@@ -167,7 +169,7 @@ export function useOpenInEditor(params: UseOpenInEditorParams): OpenInEditorStat
           setBusy(false);
         });
     },
-    [api, busy, loading],
+    [api, busy, loading, t],
   );
 
   const preferred =

@@ -1,16 +1,21 @@
 import type { ComposerAttachment, QueuedComposerMessage } from "../../../contracts/desktop-state";
+import { useTranslation, type Translate } from "../../i18n";
 import { FileIcon } from "../../ui/icons";
 import { ImageAttachmentThumb } from "./image-attachment-thumb";
 import { parseAnnotatedPrompt } from "./annotations/annotation-prompt";
 import { parseCrossProjectMessage } from "../../../contracts/thread-message";
 
-function queuedPreview(text: string): string {
+function queuedPreview(text: string, t: Translate): string {
   const crossProject = parseCrossProjectMessage(text);
-  if (crossProject) return `From project ${crossProject.project} · ${crossProject.body.trim()}`;
+  if (crossProject) {
+    return t("composer.queued.fromProject", {
+      project: crossProject.project,
+      body: crossProject.body.trim(),
+    });
+  }
   const annotated = parseAnnotatedPrompt(text);
   if (!annotated) return text;
-  const count = annotated.annotations.length;
-  const label = `${count} annotation${count === 1 ? "" : "s"}`;
+  const label = t("timeline.annotations.count", { count: annotated.annotations.length });
   return annotated.body.trim() ? `${annotated.body.trim()} · ${label}` : label;
 }
 
@@ -31,6 +36,7 @@ export function QueuedComposerMessages({
   onSteerMessage,
   onCancelEdit,
 }: QueuedComposerMessagesProps) {
+  const { t } = useTranslation();
   if (messages.length === 0 && !editingQueuedMessageId) {
     return null;
   }
@@ -39,9 +45,9 @@ export function QueuedComposerMessages({
     <div className="queued-composer-messages" data-testid="queued-composer-messages">
       {editingQueuedMessageId ? (
         <div className="queued-composer-messages__editing" data-testid="queued-composer-editing">
-          <span>Editing queued message</span>
+          <span>{t("composer.queued.editing")}</span>
           <button type="button" onClick={onCancelEdit}>
-            Cancel
+            {t("composer.queued.cancel")}
           </button>
         </div>
       ) : null}
@@ -53,27 +59,29 @@ export function QueuedComposerMessages({
         >
           <div className="queued-composer-message__header">
             {message.text ? (
-              <div className="queued-composer-message__text">{queuedPreview(message.text)}</div>
+              <div className="queued-composer-message__text">{queuedPreview(message.text, t)}</div>
             ) : null}
             <div className="queued-composer-message__actions">
               {message.mode !== "steer" ? (
                 <button type="button" onClick={() => onSteerMessage(message.id)}>
-                  Steer
+                  {t("composer.queued.steer")}
                 </button>
               ) : null}
               {/* Annotations cannot be reattached, and an origin header must stay intact. */}
               {parseAnnotatedPrompt(message.text) ||
               parseCrossProjectMessage(message.text) ? null : (
                 <button type="button" onClick={() => onEditMessage(message.id)}>
-                  Edit
+                  {t("composer.queued.edit")}
                 </button>
               )}
               <button
-                aria-label={`Delete queued message ${message.text || message.id}`}
+                aria-label={t("composer.queued.deleteNamed", {
+                  text: message.text || message.id,
+                })}
                 type="button"
                 onClick={() => onRemoveMessage(message.id)}
               >
-                Delete
+                {t("composer.queued.delete")}
               </button>
             </div>
           </div>

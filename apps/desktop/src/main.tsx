@@ -7,6 +7,7 @@ import { WindowFrame } from "./app/window-titlebar";
 import { I18nProvider } from "./i18n";
 import { applyLastTheme } from "./ui/active-theme";
 import "./dev-reload-hook";
+import "katex/dist/katex.min.css";
 import "./styles.css";
 
 window.addEventListener(

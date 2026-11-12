@@ -85,6 +85,12 @@ export interface LaunchDesktopOptions {
   readonly inheritParentEnv?: boolean;
   readonly recordVideoDir?: string;
   readonly recordVideoSize?: { readonly width: number; readonly height: number };
+  /**
+   * Locale seeded before the first paint. `"product"` leaves the build default
+   * (Simplified Chinese). Every other launch pins English so existing specs
+   * keep their accessible names.
+   */
+  readonly localePreference?: "product" | "system" | "en" | "zh-CN";
 }
 
 export interface SeedAgentDirOptions {
@@ -433,6 +439,9 @@ function buildDesktopLaunchEnv(
       ? { PI_APP_NOTIFICATION_LOG_PATH: options.notificationLogPath }
       : {}),
     PI_APP_OPEN_DEVTOOLS: "0",
+    ...(options.localePreference === "product"
+      ? { PI_APP_LOCALE: "" }
+      : { PI_APP_LOCALE: options.localePreference ?? "en" }),
     ...(options.envOverrides ?? {}),
   };
   for (const [key, value] of Object.entries(options.envOverrides ?? {})) {

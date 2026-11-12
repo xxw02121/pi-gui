@@ -48,18 +48,25 @@ test("Settings switches to Simplified Chinese and back, and the choice survives 
   test.setTimeout(90_000);
   const userDataDir = await makeUserDataDir();
   const workspacePath = await makeWorkspace("settings-language");
-  const launch = () => launchDesktop(userDataDir, { initialWorkspaces: [workspacePath] });
+  const launch = () =>
+    launchDesktop(userDataDir, {
+      initialWorkspaces: [workspacePath],
+      localePreference: "product",
+    });
 
   const firstRun = await launch();
   try {
     const window = await firstRun.firstWindow();
     const surface = await openAppearance(window);
 
-    // Until the user picks one, the language follows the OS.
-    await expect(languagePicker(window)).toHaveValue("system");
+    // A fresh profile uses Simplified Chinese. System and English stay in the picker.
+    await expect(languagePicker(window)).toHaveValue("zh-CN");
+    await expect(window.locator("html")).toHaveAttribute("lang", "zh-CN");
+    await languagePicker(window).selectOption("system");
     const systemLanguages = await window.evaluate(() => [...navigator.languages]);
     const systemLocale = resolveLocale("system", systemLanguages);
     await expect(window.locator("html")).toHaveAttribute("lang", systemLocale);
+    await languagePicker(window).selectOption("zh-CN");
 
     await languagePicker(window).selectOption("zh-CN");
     await expect(window.locator("html")).toHaveAttribute("lang", "zh-CN");

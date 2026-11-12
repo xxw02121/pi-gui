@@ -1,4 +1,14 @@
 import type { Messages } from "./en";
+import { composerZhCN } from "./fragments/composer.zh-CN";
+import { extensionsZhCN } from "./fragments/extensions.zh-CN";
+import { mainZhCN } from "./fragments/main.zh-CN";
+import { paletteZhCN } from "./fragments/palette.zh-CN";
+import { shellZhCN } from "./fragments/shell.zh-CN";
+import { sidebarZhCN } from "./fragments/sidebar.zh-CN";
+import { tasksZhCN } from "./fragments/tasks.zh-CN";
+import { threadsZhCN } from "./fragments/threads.zh-CN";
+import { timelineZhCN } from "./fragments/timeline.zh-CN";
+import { workbenchZhCN } from "./fragments/workbench.zh-CN";
 
 /*
  * Simplified Chinese copy. Partial on purpose: a key missing here renders the
@@ -171,7 +181,8 @@ export const zhCN: Partial<Messages> = {
   "settings.appearance.mode.light": "浅色",
   "settings.appearance.mode.dark": "深色",
   "settings.appearance.language.title": "语言",
-  "settings.appearance.language.description": "跟随系统语言，或指定 pi-gui 显示的语言。",
+  "settings.appearance.language.description":
+    "默认使用简体中文。也可以跟随系统语言，或改用英文。",
   "settings.appearance.language.label": "语言",
   "settings.appearance.language.system": "跟随系统",
   "settings.appearance.colorPreset.title": "配色方案",
@@ -264,4 +275,19 @@ export const zhCN: Partial<Messages> = {
   "settings.common.remove": "移除",
   "settings.common.edit": "编辑",
   "settings.common.cancel": "取消",
+  "markdown.copy": "复制",
+  "markdown.copied": "已复制",
+  "markdown.copyCode": "复制代码",
+  "markdown.imageWithAlt": "[图片：{alt}]",
+  "markdown.imageBlocked": "[图片]",
+  ...shellZhCN,
+  ...sidebarZhCN,
+  ...threadsZhCN,
+  ...composerZhCN,
+  ...timelineZhCN,
+  ...workbenchZhCN,
+  ...paletteZhCN,
+  ...extensionsZhCN,
+  ...tasksZhCN,
+  ...mainZhCN,
 };

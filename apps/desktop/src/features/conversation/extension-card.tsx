@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import type { ExtensionAction, ExtensionCard, ExtensionCardTone } from "@pi-gui/session-driver";
+import { useTranslation, type Translate } from "../../i18n";
 import { ExtensionIcon } from "../../ui/icons";
 
 /** Asks the app to run one of the fixed actions an extension's button can name. */
@@ -21,7 +22,8 @@ export function ExtensionCardItem({
   readonly controls?: ReactNode;
   readonly collapsed?: boolean;
 }) {
-  const toneLabel = cardToneLabel(card.tone);
+  const { t } = useTranslation();
+  const toneLabel = cardToneLabel(card.tone, t);
   const hasBody = !collapsed && (card.rows.length > 0 || card.actions.length > 0);
   return (
     <section
@@ -50,7 +52,7 @@ export function ExtensionCardItem({
             </li>
           ))}
           {card.actions.map((action, index) => {
-            const target = actionTarget(action);
+            const target = actionTarget(action, t);
             return (
               <li key={`action:${index}`}>
                 <button
@@ -74,18 +76,18 @@ export function ExtensionCardItem({
 }
 
 /** What a button will touch, shown beside its label so the user knows before clicking. */
-function actionTarget(action: ExtensionAction): string {
+function actionTarget(action: ExtensionAction, t: Translate): string {
   switch (action.type) {
     case "openFile":
       return action.line ? `${action.path}:${action.line}` : action.path;
     case "composer":
-      return "Adds to message";
+      return t("timeline.card.addsToMessage");
     case "url":
       return new URL(action.url).host;
     case "command":
       return action.command;
     case "openThread":
-      return "Opens thread";
+      return t("timeline.card.opensThread");
     default:
       return unhandledAction(action);
   }
@@ -95,14 +97,14 @@ function unhandledAction(action: never): string {
   return (action as ExtensionAction).label;
 }
 
-function cardToneLabel(tone: ExtensionCardTone): string | undefined {
+function cardToneLabel(tone: ExtensionCardTone, t: Translate): string | undefined {
   switch (tone) {
     case "success":
-      return "Passed";
+      return t("timeline.card.passed");
     case "warning":
-      return "Warning";
+      return t("timeline.card.warning");
     case "error":
-      return "Failed";
+      return t("timeline.card.failed");
     case "neutral":
       return undefined;
   }

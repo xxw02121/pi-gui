@@ -137,6 +137,36 @@ export function extensionToLanguage(filePath: string): string | undefined {
   return EXTENSION_TO_LANGUAGE[ext];
 }
 
+const FENCE_TO_LANGUAGE: Readonly<Record<string, string>> = {
+  ts: "typescript",
+  typescript: "typescript",
+  mts: "typescript",
+  cts: "typescript",
+  tsx: "tsx",
+  js: "javascript",
+  javascript: "javascript",
+  mjs: "javascript",
+  cjs: "javascript",
+  jsx: "tsx",
+  json: "json",
+  py: "python",
+  python: "python",
+  sh: "bash",
+  bash: "bash",
+  shell: "bash",
+  zsh: "bash",
+  console: "bash",
+};
+
+const loadedSyntaxLanguages = new Set(Object.values(EXTENSION_TO_LANGUAGE));
+
+/** Shiki language for a markdown fence, when that grammar is loaded. */
+export function fenceToSyntaxLanguage(fence: string | undefined): string | undefined {
+  if (!fence) return undefined;
+  const language = FENCE_TO_LANGUAGE[fence.toLowerCase()];
+  return language && loadedSyntaxLanguages.has(language) ? language : undefined;
+}
+
 const lineCache = new LRUCache<string, HighlightLine>({ max: 5000 });
 
 /** Coloured tokens for one line, or null until the highlighter has loaded. */

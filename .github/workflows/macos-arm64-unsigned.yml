@@ -1,0 +1,60 @@
+name: macOS arm64 (unsigned)
+
+# Forks without an Apple Developer certificate can still produce an arm64 .app
+# and .dmg. The signed Release workflow stays unchanged and still requires
+# notarization secrets. Run this workflow by hand, or push a v* tag.
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v[0-9]*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: macos-arm64-unsigned-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-macos-arm64:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build desktop
+        run: pnpm --filter @pi-gui/desktop run build
+
+      - name: Package unsigned macOS arm64
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+        run: |
+          cd apps/desktop
+          pnpm exec electron-builder --mac --arm64 --publish never \
+            -c.mac.notarize=false \
+            -c.mac.identity=null \
+            -c.mac.hardenedRuntime=false \
+            -c.dmg.sign=false
+
+      - name: Upload macOS arm64 artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: pi-gui-macos-arm64-unsigned
+          path: |
+            apps/desktop/release/*.dmg
+            apps/desktop/release/*.zip
+            apps/desktop/release/mac-arm64/**
+          if-no-files-found: error
+          retention-days: 14

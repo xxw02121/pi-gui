@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "../../i18n";
 import type { SessionRef } from "@pi-gui/session-driver/types";
 import type { PiDesktopApi } from "../../../contracts/ipc";
 import type { useWorkbench } from "../workbench/use-workbench";
@@ -18,6 +19,9 @@ export function useExtensionHostActions({
   readonly workbench: ReturnType<typeof useWorkbench>;
   readonly flushComposerDraftAsync: (target: SessionRef) => Promise<void>;
 }) {
+  const { t } = useTranslation();
+  const tRef = useRef(t);
+  tRef.current = t;
   const [fileError, setFileError] = useState<{
     readonly target: SessionRef;
     readonly message: string;
@@ -34,11 +38,10 @@ export function useExtensionHostActions({
   const beforePrepareTaskDraft = useCallback(async () => {
     const draftTarget = target;
     if (!draftTarget || targetRef.current !== draftTarget)
-      throw new Error("Return to the extension's task to create a task draft.");
+      throw new Error(t("extensions.host.returnToTask"));
     await flushComposerDraftAsync(draftTarget);
-    if (targetRef.current !== draftTarget)
-      throw new Error("The task changed before its draft could be saved.");
-  }, [flushComposerDraftAsync, target]);
+    if (targetRef.current !== draftTarget) throw new Error(t("extensions.host.taskChanged"));
+  }, [flushComposerDraftAsync, t, target]);
   const handlePrepareTaskDraftPendingChange = useCallback(
     (pending: boolean, requestKey: string) => {
       setPreparingDrafts((current) => {
@@ -70,9 +73,14 @@ export function useExtensionHostActions({
           .openFile({ workspaceId: event.target.workspaceId, path: event.path, line: event.line })
           .catch((error: unknown) => {
             if (targetRef.current !== current || fileRequestRef.current !== request) return;
+            const translateNow = tRef.current;
             setFileError({
               target: current,
-              message: `Couldn't open ${event.path}. ${error instanceof Error ? error.message : "Try opening the file again."}`,
+              message: translateNow("extensions.host.openFailed", {
+                path: event.path,
+                detail:
+                  error instanceof Error ? error.message : translateNow("extensions.host.tryAgain"),
+              }),
             });
           });
       }),

@@ -1,4 +1,5 @@
 import { app, net, Notification, shell } from "electron";
+import { uiText } from "../ui-locale";
 
 // /releases/latest skips drafts and prereleases, so stable installs are only
 // told about stable releases.
@@ -37,8 +38,8 @@ export function showUpdateNotification(
     return;
   }
   const notification = new Notification({
-    title: "pi-gui Release Available",
-    body: `Version ${latestVersion} is available (you have ${currentVersion}). Click to view the release.`,
+    title: uiText("notify.releaseTitle"),
+    body: uiText("notify.releaseBody", { latestVersion, currentVersion }),
   });
   notification.on("click", () => {
     void openReleasesPage(releaseUrl).catch((error: unknown) => {
@@ -65,22 +66,22 @@ export async function checkForUpdate(): Promise<UpdateCheckResult> {
   } catch (error) {
     const message =
       error instanceof Error && error.name === "AbortError"
-        ? "The update check timed out."
+        ? uiText("update.timeout")
         : error instanceof Error
           ? error.message
-          : "The update check could not reach GitHub.";
+          : uiText("update.unreachable");
     return { status: "error", message };
   } finally {
     clearTimeout(timeout);
   }
 
   if (res.status === 404) {
-    return { status: "error", message: "No stable pi-gui release has been published yet." };
+    return { status: "error", message: uiText("update.nonePublished") };
   }
   if (!res.ok) {
     return {
       status: "error",
-      message: `GitHub Releases returned ${res.status}.`,
+      message: uiText("update.httpStatus", { status: res.status }),
     };
   }
 
@@ -88,13 +89,13 @@ export async function checkForUpdate(): Promise<UpdateCheckResult> {
   try {
     release = (await res.json()) as GitHubRelease;
   } catch {
-    return { status: "error", message: "GitHub Releases returned an unreadable response." };
+    return { status: "error", message: uiText("update.unreadable") };
   }
 
   if (!release?.tag_name) {
     return {
       status: "error",
-      message: "GitHub Releases did not return any published versions.",
+      message: uiText("update.noVersions"),
     };
   }
 

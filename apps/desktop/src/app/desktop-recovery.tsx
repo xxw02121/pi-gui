@@ -1,4 +1,6 @@
 import { Component, Fragment, type ReactNode } from "react";
+import { useTranslation, type Translate } from "../i18n";
+import { translate } from "../i18n/translate";
 import type { DesktopAppView, StateHydrationFailure } from "./desktop-app-state";
 
 export type DesktopStartupSurfaceState =
@@ -16,45 +18,56 @@ export interface DesktopStartupCopy {
   readonly status: "loading" | "failed" | "crashed";
 }
 
-const LOADING_COPY: DesktopStartupCopy = {
-  title: "Loading sessions",
-  body: "The desktop shell is restoring folder and thread state from the main process.",
-  status: "loading",
-};
-
-const STATE_FAILED_COPY: DesktopStartupCopy = {
-  title: "Couldn't restore sessions",
-  body: "The desktop shell couldn't read folder and thread state. Retry, or relaunch the app.",
-  status: "failed",
-};
-
-const BRIDGE_FAILED_COPY: DesktopStartupCopy = {
-  title: "Couldn't restore sessions",
-  body: "The desktop shell isn't connected. Quit pi-gui and reopen it.",
-  status: "failed",
-};
-
-const CRASHED_COPY: DesktopStartupCopy = {
-  title: "Something went wrong",
-  body: "The desktop window hit an unexpected error. Retry to remount, or relaunch the app.",
-  status: "crashed",
-};
-
-export function startupSurfaceCopy(state: DesktopStartupSurfaceState): DesktopStartupCopy {
-  if (state.kind === "loading") {
-    return LOADING_COPY;
-  }
-  if (state.kind === "crashed") {
-    return CRASHED_COPY;
-  }
-  if (state.failure.code === "bridge-unavailable") {
-    return BRIDGE_FAILED_COPY;
-  }
-  return STATE_FAILED_COPY;
+function loadingCopy(t: Translate): DesktopStartupCopy {
+  return {
+    title: t("shell.loadingTitle"),
+    body: t("shell.loadingBody"),
+    status: "loading",
+  };
 }
 
-export function rendererBoundaryCopy(): DesktopStartupCopy {
-  return CRASHED_COPY;
+function stateFailedCopy(t: Translate): DesktopStartupCopy {
+  return {
+    title: t("shell.restoreFailedTitle"),
+    body: t("shell.restoreFailedBody"),
+    status: "failed",
+  };
+}
+
+function bridgeFailedCopy(t: Translate): DesktopStartupCopy {
+  return {
+    title: t("shell.restoreFailedTitle"),
+    body: t("shell.bridgeFailedBody"),
+    status: "failed",
+  };
+}
+
+function crashedCopy(t: Translate): DesktopStartupCopy {
+  return {
+    title: t("shell.crashedTitle"),
+    body: t("shell.crashedBody"),
+    status: "crashed",
+  };
+}
+
+export function startupSurfaceCopy(
+  state: DesktopStartupSurfaceState,
+  t: Translate = translate,
+): DesktopStartupCopy {
+  if (state.kind === "loading") {
+    return loadingCopy(t);
+  }
+  if (state.kind === "crashed") {
+    return crashedCopy(t);
+  }
+  if (state.failure.code === "bridge-unavailable") {
+    return bridgeFailedCopy(t);
+  }
+  return stateFailedCopy(t);
+}
+
+export function rendererBoundaryCopy(t: Translate = translate): DesktopStartupCopy {
+  return crashedCopy(t);
 }
 
 interface DesktopStartupSurfaceProps {
@@ -64,7 +77,8 @@ interface DesktopStartupSurfaceProps {
 }
 
 export function DesktopStartupSurface({ state, onRetry, onRelaunch }: DesktopStartupSurfaceProps) {
-  const copy = startupSurfaceCopy(state);
+  const { t } = useTranslation();
+  const copy = startupSurfaceCopy(state, t);
   const retrying = state.kind === "failed" ? state.retrying : false;
   const showActions = copy.status !== "loading";
   const showRelaunch =
@@ -93,7 +107,7 @@ export function DesktopStartupSurface({ state, onRetry, onRelaunch }: DesktopSta
               disabled={retrying}
               onClick={onRetry}
             >
-              {retrying ? "Retrying…" : "Retry"}
+              {retrying ? t("shell.retrying") : t("shell.retry")}
             </button>
             {showRelaunch ? (
               <button
@@ -102,7 +116,7 @@ export function DesktopStartupSurface({ state, onRetry, onRelaunch }: DesktopSta
                 type="button"
                 onClick={onRelaunch}
               >
-                Relaunch pi-gui
+                {t("shell.relaunch")}
               </button>
             ) : null}
           </div>
