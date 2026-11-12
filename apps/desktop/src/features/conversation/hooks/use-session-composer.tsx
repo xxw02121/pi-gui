@@ -20,6 +20,7 @@ import {
   handleClipboardImageShortcut,
   readComposerAttachmentsFromFiles,
 } from "../composer-attachments";
+import { useTranslation } from "../../../i18n";
 import { parseTreeComposerCommand } from "../composer-commands";
 import { formatAnnotatedPrompt } from "../annotations/annotation-prompt";
 import type { TranscriptAnnotations } from "../annotations/use-transcript-annotations";
@@ -68,6 +69,7 @@ export function useSessionComposer(params: UseSessionComposerParams) {
     onNewThreadComposerError,
     annotations,
   } = params;
+  const { t } = useTranslation();
 
   // Attachments optimistically hidden while their submit is in flight. Scoped to the
   // submitted ids (not a blanket flag) because the submit IPC resolves only after the
@@ -113,7 +115,7 @@ export function useSessionComposer(params: UseSessionComposerParams) {
       return;
     }
 
-    const treeCommand = parseTreeComposerCommand(composerDraft);
+    const treeCommand = parseTreeComposerCommand(composerDraft, t);
     if (treeCommand?.type === "error") {
       setSnapshot((current) =>
         current

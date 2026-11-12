@@ -6,6 +6,7 @@ import type {
   RuntimeSnapshot,
 } from "@pi-gui/session-driver/runtime-types";
 import type { ExtensionCommandCompatibilityRecord } from "../../../contracts/desktop-state";
+import { translate, type Translate } from "../../i18n/translate";
 import { titleCase } from "../../lib/string-utils";
 
 export type ComposerSlashCommandKind =
@@ -63,18 +64,16 @@ export interface ComposerProviderOption extends ComposerSlashOption {
   readonly providerId: string;
 }
 
-export const MODEL_OPTIONS_EMPTY_TITLE = "No models available";
-export const MODEL_OPTIONS_EMPTY_DESCRIPTION =
-  "Open Settings to enable a model or log in to a provider.";
+export const MODEL_OPTIONS_EMPTY_TITLE = translate("composer.models.emptyTitle");
+export const MODEL_OPTIONS_EMPTY_DESCRIPTION = translate("composer.models.emptyDescription");
 
-const HOST_ACTION_SLASH_COMMANDS: readonly ComposerSlashCommand[] = [
+const HOST_ACTION_SLASH_COMMANDS = [
   {
     id: "host:model",
     kind: "model",
     command: "/model",
-    template: "/model",
-    title: "Model",
-    description: "Choose the model for this session",
+    titleKey: "composer.slash.model.title",
+    descriptionKey: "composer.slash.model.description",
     submitMode: "pick-option",
     section: "host",
   },
@@ -82,9 +81,8 @@ const HOST_ACTION_SLASH_COMMANDS: readonly ComposerSlashCommand[] = [
     id: "host:thinking",
     kind: "thinking",
     command: "/thinking",
-    template: "/thinking",
-    title: "Reasoning",
-    description: "Set thinking level for this session",
+    titleKey: "composer.slash.thinking.title",
+    descriptionKey: "composer.slash.thinking.description",
     submitMode: "pick-option",
     section: "host",
   },
@@ -92,9 +90,8 @@ const HOST_ACTION_SLASH_COMMANDS: readonly ComposerSlashCommand[] = [
     id: "host:tree",
     kind: "tree",
     command: "/tree",
-    template: "/tree",
-    title: "Tree",
-    description: "Browse and jump between branches in this session",
+    titleKey: "composer.slash.tree.title",
+    descriptionKey: "composer.slash.tree.description",
     submitMode: "immediate",
     section: "host",
   },
@@ -102,9 +99,8 @@ const HOST_ACTION_SLASH_COMMANDS: readonly ComposerSlashCommand[] = [
     id: "host:status",
     kind: "status",
     command: "/status",
-    template: "/status",
-    title: "Status",
-    description: "Show current session overrides in the timeline",
+    titleKey: "composer.slash.status.title",
+    descriptionKey: "composer.slash.status.description",
     submitMode: "immediate",
     section: "host",
   },
@@ -112,9 +108,8 @@ const HOST_ACTION_SLASH_COMMANDS: readonly ComposerSlashCommand[] = [
     id: "host:login",
     kind: "login",
     command: "/login",
-    template: "/login",
-    title: "Login",
-    description: "Authenticate a provider for this workspace",
+    titleKey: "composer.slash.login.title",
+    descriptionKey: "composer.slash.login.description",
     submitMode: "pick-option",
     section: "host",
   },
@@ -122,9 +117,8 @@ const HOST_ACTION_SLASH_COMMANDS: readonly ComposerSlashCommand[] = [
     id: "host:logout",
     kind: "logout",
     command: "/logout",
-    template: "/logout",
-    title: "Logout",
-    description: "Remove a provider login from this workspace",
+    titleKey: "composer.slash.logout.title",
+    descriptionKey: "composer.slash.logout.description",
     submitMode: "pick-option",
     section: "host",
   },
@@ -132,9 +126,8 @@ const HOST_ACTION_SLASH_COMMANDS: readonly ComposerSlashCommand[] = [
     id: "host:settings",
     kind: "settings",
     command: "/settings",
-    template: "/settings",
-    title: "Settings",
-    description: "Open model, skill, and notification settings",
+    titleKey: "composer.slash.settings.title",
+    descriptionKey: "composer.slash.settings.description",
     submitMode: "immediate",
     section: "host",
   },
@@ -142,9 +135,8 @@ const HOST_ACTION_SLASH_COMMANDS: readonly ComposerSlashCommand[] = [
     id: "host:scoped-models",
     kind: "scoped-models",
     command: "/scoped-models",
-    template: "/scoped-models",
-    title: "Enabled models",
-    description: "Choose which models appear in pickers",
+    titleKey: "composer.slash.scopedModels.title",
+    descriptionKey: "composer.slash.scopedModels.description",
     submitMode: "immediate",
     section: "host",
   },
@@ -152,9 +144,8 @@ const HOST_ACTION_SLASH_COMMANDS: readonly ComposerSlashCommand[] = [
     id: "host:session",
     kind: "session",
     command: "/session",
-    template: "/session",
-    title: "Session",
-    description: "Show current session details in the timeline",
+    titleKey: "composer.slash.session.title",
+    descriptionKey: "composer.slash.session.description",
     submitMode: "immediate",
     section: "host",
   },
@@ -162,9 +153,9 @@ const HOST_ACTION_SLASH_COMMANDS: readonly ComposerSlashCommand[] = [
     id: "host:name",
     kind: "name",
     command: "/name",
-    template: "/name New thread title",
-    title: "Rename",
-    description: "Rename the current session",
+    templateKey: "composer.slash.name.template",
+    titleKey: "composer.slash.name.title",
+    descriptionKey: "composer.slash.name.description",
     submitMode: "prefill",
     section: "host",
   },
@@ -172,9 +163,8 @@ const HOST_ACTION_SLASH_COMMANDS: readonly ComposerSlashCommand[] = [
     id: "host:compact",
     kind: "compact",
     command: "/compact",
-    template: "/compact",
-    title: "Compact",
-    description: "Compact session context now",
+    titleKey: "composer.slash.compact.title",
+    descriptionKey: "composer.slash.compact.description",
     submitMode: "immediate",
     section: "host",
   },
@@ -182,41 +172,57 @@ const HOST_ACTION_SLASH_COMMANDS: readonly ComposerSlashCommand[] = [
     id: "host:reload",
     kind: "reload",
     command: "/reload",
-    template: "/reload",
-    title: "Reload",
-    description: "Reload prompts, skills, and session resources",
+    titleKey: "composer.slash.reload.title",
+    descriptionKey: "composer.slash.reload.description",
     submitMode: "immediate",
     section: "host",
   },
 ] as const;
 
-export const THINKING_OPTIONS: readonly ComposerSlashOption[] = [
-  {
-    value: "low",
-    label: "Low",
-    description: "Fast responses with lighter reasoning",
-  },
-  {
-    value: "medium",
-    label: "Medium",
-    description: "Balances speed and reasoning depth for everyday tasks",
-  },
-  {
-    value: "high",
-    label: "High",
-    description: "Greater reasoning depth for complex problems",
-  },
-  {
-    value: "xhigh",
-    label: "Extra High",
-    description: "Extra high reasoning depth for complex problems",
-  },
-  {
-    value: "max",
-    label: "Max",
-    description: "Maximum reasoning depth for supported models",
-  },
-] as const;
+function hostActionSlashCommands(t: Translate): readonly ComposerSlashCommand[] {
+  return HOST_ACTION_SLASH_COMMANDS.map((command) => ({
+    id: command.id,
+    kind: command.kind,
+    command: command.command,
+    template: "templateKey" in command ? t(command.templateKey) : command.command,
+    title: t(command.titleKey),
+    description: t(command.descriptionKey),
+    submitMode: command.submitMode,
+    section: command.section,
+  }));
+}
+
+export function thinkingOptions(t: Translate = translate): readonly ComposerSlashOption[] {
+  return [
+    {
+      value: "low",
+      label: t("composer.thinking.low"),
+      description: t("composer.thinking.lowDescription"),
+    },
+    {
+      value: "medium",
+      label: t("composer.thinking.medium"),
+      description: t("composer.thinking.mediumDescription"),
+    },
+    {
+      value: "high",
+      label: t("composer.thinking.high"),
+      description: t("composer.thinking.highDescription"),
+    },
+    {
+      value: "xhigh",
+      label: t("composer.thinking.xhigh"),
+      description: t("composer.thinking.xhighDescription"),
+    },
+    {
+      value: "max",
+      label: t("composer.thinking.max"),
+      description: t("composer.thinking.maxDescription"),
+    },
+  ];
+}
+
+export const THINKING_OPTIONS: readonly ComposerSlashOption[] = thinkingOptions();
 
 export function buildSlashCommandSections(
   query: string,
@@ -226,6 +232,7 @@ export function buildSlashCommandSections(
   options: {
     readonly allowTreeCommand?: boolean;
   } = {},
+  t: Translate = translate,
 ): readonly ComposerSlashCommandSection[] {
   const normalizedQuery = query.trim().toLowerCase();
   const availableRuntimeCommands = resolveRuntimeCommands(runtime, sessionCommands);
@@ -241,18 +248,18 @@ export function buildSlashCommandSections(
       command: `/${command.name}`,
       template: `/${command.name} `,
       title: formatRuntimeCommandTitle(command),
-      description: formatRuntimeCommandDescription(command),
+      description: formatRuntimeCommandDescription(command, t),
       submitMode: "prefill",
       section: "runtime",
       runtimeCommand: command,
-      sourceLabel: formatRuntimeSourceLabel(command),
+      sourceLabel: formatRuntimeSourceLabel(command, t),
       compatibility: compatibilityByKey.get(`${command.sourceInfo.path}::${command.name}`),
     }))
-    .filter((command) => matchesCommand(command, normalizedQuery));
+    .filter((command) => matchesCommand(command, normalizedQuery, t));
   const allowTreeCommand = options.allowTreeCommand ?? true;
-  const hostMatches = HOST_ACTION_SLASH_COMMANDS.filter(
+  const hostMatches = hostActionSlashCommands(t).filter(
     (command) =>
-      (allowTreeCommand || command.kind !== "tree") && matchesCommand(command, normalizedQuery),
+      (allowTreeCommand || command.kind !== "tree") && matchesCommand(command, normalizedQuery, t),
   );
 
   // Prefer a host action when it is a prefix match and runtime skills only
@@ -266,12 +273,12 @@ export function buildSlashCommandSections(
   );
   const runtimeSection: ComposerSlashCommandSection = {
     id: "runtime",
-    title: runtimeMatches.length > 0 ? "Runtime Commands" : undefined,
+    title: runtimeMatches.length > 0 ? t("composer.slash.runtimeCommands") : undefined,
     items: runtimeMatches,
   };
   const hostSection: ComposerSlashCommandSection = {
     id: "host",
-    title: hostMatches.length > 0 ? "Host Actions" : undefined,
+    title: hostMatches.length > 0 ? t("composer.slash.hostActions") : undefined,
     items: hostMatches,
   };
   const sections: ComposerSlashCommandSection[] =
@@ -291,6 +298,7 @@ export function flattenSlashSections(
 export function buildProviderOptions(
   providers: readonly RuntimeProviderRecord[],
   filter: (provider: RuntimeProviderRecord) => boolean = () => true,
+  t: Translate = translate,
 ): readonly ComposerProviderOption[] {
   return providers
     .filter(filter)
@@ -298,7 +306,7 @@ export function buildProviderOptions(
     .map((provider) => ({
       value: provider.id,
       label: provider.name,
-      description: describeProvider(provider),
+      description: describeProvider(provider, t),
       providerId: provider.id,
     }));
 }
@@ -335,24 +343,26 @@ export function buildModelOptions(
 export function slashOptionsForCommand(
   command: ComposerSlashCommand | undefined,
   runtime?: RuntimeSnapshot,
+  t: Translate = translate,
 ): readonly ComposerSlashOption[] {
   if (!command) {
     return [];
   }
 
   if (command.kind === "thinking") {
-    return THINKING_OPTIONS;
+    return thinkingOptions(t);
   }
   if (command.kind === "model") {
     return buildModelOptions(runtime);
   }
   if (command.kind === "login") {
-    return buildProviderOptions(runtime?.providers ?? [], (provider) => provider.oauthSupported);
+    return buildProviderOptions(runtime?.providers ?? [], (provider) => provider.oauthSupported, t);
   }
   if (command.kind === "logout") {
     return buildProviderOptions(
       runtime?.providers ?? [],
       (provider) => provider.authSource === "oauth" || provider.authSource === "auth_file",
+      t,
     );
   }
 
@@ -362,6 +372,7 @@ export function slashOptionsForCommand(
 export function slashOptionEmptyState(
   command: ComposerSlashCommand | undefined,
   runtime?: RuntimeSnapshot,
+  t: Translate = translate,
 ): ComposerSlashOptionEmptyState | undefined {
   if (!command) {
     return undefined;
@@ -369,15 +380,19 @@ export function slashOptionEmptyState(
 
   if (command.kind === "model" && buildModelOptions(runtime).length === 0) {
     return {
-      title: MODEL_OPTIONS_EMPTY_TITLE,
-      description: MODEL_OPTIONS_EMPTY_DESCRIPTION,
+      title: t("composer.models.emptyTitle"),
+      description: t("composer.models.emptyDescription"),
     };
   }
 
   return undefined;
 }
 
-function matchesCommand(command: ComposerSlashCommand, normalizedQuery: string): boolean {
+function matchesCommand(
+  command: ComposerSlashCommand,
+  normalizedQuery: string,
+  t: Translate,
+): boolean {
   if (!normalizedQuery.startsWith("/")) {
     return false;
   }
@@ -388,7 +403,7 @@ function matchesCommand(command: ComposerSlashCommand, normalizedQuery: string):
 
   const queryWithoutSlash = normalizedQuery.replace(/^\/+/, "").trim();
   const rawSearchTerms = [command.command.toLowerCase()];
-  const aliasSearchTerms = buildSlashSearchAliases(command);
+  const aliasSearchTerms = buildSlashSearchAliases(command, t);
   if (rawSearchTerms.some((value) => value.includes(normalizedQuery))) {
     return true;
   }
@@ -400,12 +415,15 @@ function matchesCommand(command: ComposerSlashCommand, normalizedQuery: string):
   return aliasSearchTerms.some((value) => value.includes(queryWithoutSlash));
 }
 
-function buildSlashSearchAliases(command: ComposerSlashCommand): readonly string[] {
+function buildSlashSearchAliases(command: ComposerSlashCommand, t: Translate): readonly string[] {
   const aliases = new Set<string>([
     command.command.replace(/^\/+/, "").toLowerCase(),
     command.title.toLowerCase(),
     command.sourceLabel?.toLowerCase() ?? "",
     command.compatibility?.status === "terminal-only" ? "terminal-only" : "",
+    command.compatibility?.status === "terminal-only"
+      ? t("composer.slash.terminalOnly").toLowerCase()
+      : "",
   ]);
 
   if (command.runtimeCommand) {
@@ -416,26 +434,26 @@ function buildSlashSearchAliases(command: ComposerSlashCommand): readonly string
   return [...aliases].filter(Boolean);
 }
 
-function describeProvider(provider: RuntimeProviderRecord): string {
+function describeProvider(provider: RuntimeProviderRecord, t: Translate): string {
   if (provider.authSource === "oauth") {
-    return "OAuth connected";
+    return t("composer.provider.oauthConnected");
   }
   if (provider.authSource === "auth_file") {
-    return "Saved API key";
+    return t("composer.provider.savedApiKey");
   }
   if (provider.authSource === "env") {
-    return "Configured via environment";
+    return t("composer.provider.environment");
   }
   if (provider.authSource === "external") {
-    return "Configured externally";
+    return t("composer.provider.external");
   }
   if (provider.oauthSupported) {
-    return "OAuth available";
+    return t("composer.provider.oauthAvailable");
   }
   if (provider.apiKeySetupSupported) {
-    return "Needs API key";
+    return t("composer.provider.needsApiKey");
   }
-  return "Available";
+  return t("composer.provider.available");
 }
 
 function compareProviders(left: RuntimeProviderRecord, right: RuntimeProviderRecord): number {
@@ -468,10 +486,10 @@ function providerRankForId(
   return provider ? providerRank(provider) : 99;
 }
 
-function summarizeSkillDescription(value: string): string {
+function summarizeSkillDescription(value: string, t: Translate = translate): string {
   const trimmed = value.trim().replace(/\s+/g, " ");
   if (!trimmed) {
-    return "Reusable workflow";
+    return t("composer.runtime.reusableWorkflow");
   }
 
   const firstSentence = trimmed.match(/^[^.!?]+[.!?]?/)?.[0]?.trim() ?? trimmed;
@@ -485,25 +503,25 @@ function formatRuntimeCommandTitle(command: RuntimeCommandRecord): string {
   return titleCase(command.name.replace(/[:_-]+/g, " "));
 }
 
-function formatRuntimeCommandDescription(command: RuntimeCommandRecord): string {
+function formatRuntimeCommandDescription(command: RuntimeCommandRecord, t: Translate): string {
   if (command.description?.trim()) {
     return command.description.trim();
   }
   if (command.source === "prompt") {
-    return "Prompt template";
+    return t("composer.runtime.promptTemplate");
   }
   if (command.source === "skill") {
-    return "Skill command";
+    return t("composer.runtime.skillCommand");
   }
-  return "Extension command";
+  return t("composer.runtime.extensionCommand");
 }
 
-function formatRuntimeSourceLabel(command: RuntimeCommandRecord): string {
+function formatRuntimeSourceLabel(command: RuntimeCommandRecord, t: Translate): string {
   if (command.source === "skill") {
-    return "Skill";
+    return t("composer.runtime.skill");
   }
   if (command.source === "prompt") {
-    return "Prompt";
+    return t("composer.runtime.prompt");
   }
   return command.sourceInfo.source.replace(/^extension:/, "");
 }
@@ -514,6 +532,7 @@ export function isExactSlashCommand(query: string, command: ComposerSlashCommand
 
 export function parseTreeComposerCommand(
   value: string,
+  t: Translate = translate,
 ): { readonly type: "tree" } | { readonly type: "error"; readonly message: string } | undefined {
   const trimmed = value.trim();
   if (!trimmed.startsWith("/")) {
@@ -528,7 +547,7 @@ export function parseTreeComposerCommand(
   if (rest.length > 0) {
     return {
       type: "error",
-      message: "/tree does not take arguments.",
+      message: t("composer.slash.treeNoArguments"),
     };
   }
 

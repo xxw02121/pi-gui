@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import type { TurnChangeSummary, TurnChangedFile } from "../../../contracts/review";
+import { useTranslation } from "../../i18n";
 import { FileDiffIcon } from "../../ui/icons";
 
 const COLLAPSED_FILE_COUNT = 5;
@@ -14,6 +15,7 @@ export function TurnChangesCard({
   readonly turn: TurnChangeSummary;
   readonly onOpen?: OpenTurnChange;
 }) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const listRef = useRef<HTMLUListElement | null>(null);
   const { files } = turn;
@@ -31,7 +33,7 @@ export function TurnChangesCard({
   return (
     <section
       className="turn-changes"
-      aria-label="Files changed in this turn"
+      aria-label={t("timeline.turnChanges.label")}
       data-testid="turn-changes"
     >
       <header className="turn-changes__header">
@@ -40,7 +42,7 @@ export function TurnChangesCard({
         </span>
         <div className="turn-changes__summary">
           <span className="turn-changes__title">
-            {`Edited ${files.length} ${files.length === 1 ? "file" : "files"}`}
+            {t("timeline.turnChanges.edited", { count: files.length })}
           </span>
           <LineStats lines={totals} />
         </div>
@@ -50,7 +52,7 @@ export function TurnChangesCard({
             className="turn-changes__review"
             onClick={() => onOpen(turn, firstFile.path)}
           >
-            Review
+            {t("timeline.turnChanges.review")}
           </button>
         ) : null}
       </header>
@@ -85,7 +87,7 @@ export function TurnChangesCard({
                 );
               }}
             >
-              {`Show ${hidden} more`}
+              {t("timeline.turnChanges.showMore", { count: hidden })}
             </button>
           </li>
         ) : null}
@@ -105,10 +107,13 @@ function FilePath({ path }: { readonly path: string }) {
 }
 
 function FileStats({ file }: { readonly file: TurnChangedFile }) {
+  const { t } = useTranslation();
   return file.lines ? (
     <LineStats lines={file.lines} />
   ) : (
-    <span className="turn-changes__stats turn-changes__binary">Binary</span>
+    <span className="turn-changes__stats turn-changes__binary">
+      {t("timeline.turnChanges.binary")}
+    </span>
   );
 }
 

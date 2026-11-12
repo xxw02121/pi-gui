@@ -1,4 +1,5 @@
 import type { RefObject } from "react";
+import { useTranslation } from "../../i18n";
 
 interface ThreadSearchBarProps {
   readonly query: string;
@@ -21,13 +22,14 @@ export function ThreadSearchBar({
   onPrev,
   onClose,
 }: ThreadSearchBarProps) {
+  const { t } = useTranslation();
   return (
     <div className="thread-search-bar" data-testid="thread-search-bar">
       <input
         ref={inputRef}
         className="thread-search-bar__input"
         type="text"
-        placeholder="Search thread..."
+        placeholder={t("timeline.search.placeholder")}
         value={query}
         onChange={(e) => onSearch(e.target.value)}
         onKeyDown={(e) => {
@@ -45,11 +47,15 @@ export function ThreadSearchBar({
         }}
       />
       <span className="thread-search-bar__count">
-        {query ? (matchCount > 0 ? `${activeIndex + 1} / ${matchCount}` : "0 results") : ""}
+        {query
+          ? matchCount > 0
+            ? `${activeIndex + 1} / ${matchCount}`
+            : t("timeline.search.noResults")
+          : ""}
       </span>
       <div className="thread-search-bar__actions">
         <button
-          aria-label="Previous match"
+          aria-label={t("timeline.search.previous")}
           className="icon-button"
           type="button"
           disabled={matchCount === 0}
@@ -58,7 +64,7 @@ export function ThreadSearchBar({
           &#x25B2;
         </button>
         <button
-          aria-label="Next match"
+          aria-label={t("timeline.search.next")}
           className="icon-button"
           type="button"
           disabled={matchCount === 0}
@@ -66,7 +72,12 @@ export function ThreadSearchBar({
         >
           &#x25BC;
         </button>
-        <button aria-label="Close search" className="icon-button" type="button" onClick={onClose}>
+        <button
+          aria-label={t("timeline.search.close")}
+          className="icon-button"
+          type="button"
+          onClick={onClose}
+        >
           &#x2715;
         </button>
       </div>
