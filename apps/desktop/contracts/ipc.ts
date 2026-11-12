@@ -108,6 +108,7 @@ export type NewMcpServerInput = { readonly name: string; readonly description?: 
 );
 
 export const desktopIpc = {
+  setUiLocale: "pi-gui:set-ui-locale",
   extensionViewOpenFile: "pi-gui:extension-view-open-file",
   listExtensionViews: "pi-gui:list-extension-views",
   openExtensionView: "pi-gui:open-extension-view",
@@ -722,6 +723,8 @@ export const drawWindowControlsArgument = "--pi-draw-window-controls";
 
 export interface PiDesktopApi {
   platform: NodeJS.Platform;
+  /** Tells the main process which language to use for native menus and dialogs. */
+  setUiLocale?(locale: string): void;
   /** True when the window has no native title bar and the app draws its own. */
   drawsWindowControls: boolean;
   versions: NodeJS.ProcessVersions;

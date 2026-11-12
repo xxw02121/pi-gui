@@ -13,6 +13,7 @@ import type {
   WorkspaceRef,
 } from "@pi-gui/session-driver";
 import type { PiSdkDriver } from "@pi-gui/pi-sdk-driver";
+import { uiText } from "../ui-locale";
 import type {
   DesktopAppState,
   OrchestrationEvidenceRecord,
@@ -293,7 +294,7 @@ async function createChildThreadRecord(
           kind: "orchestrator_acceptance",
           source: "orchestrator-accepted",
           status: "accepted",
-          title: "Child thread created",
+          title: uiText("orchestration.childCreated"),
           detail: prompt,
           parentSessionId: input.parentSessionId,
           childSessionId: childRef.sessionId,
@@ -1226,7 +1227,7 @@ function markInitialPromptDeliveryFailed(
                 kind: "blocker",
                 source: "blocker",
                 status: "failed",
-                title: "Initial prompt delivery failed",
+                title: uiText("orchestration.promptFailed"),
                 detail: message,
                 parentSessionId: child.parentSessionId,
                 childSessionId: child.childSessionId,
@@ -2166,7 +2167,7 @@ function evidenceFromParentTranscript(
           kind: "orchestrator_observation",
           source: "orchestrator-observed",
           status: "reported",
-          title: "Orchestrator read child output",
+          title: uiText("orchestration.readOutput"),
           detail: truncateEvidenceDetail(textFromToolOutput(message.output)),
           parentSessionId: child.parentSessionId,
           childSessionId: child.childSessionId,
@@ -2182,7 +2183,7 @@ function evidenceFromParentTranscript(
           kind: "orchestrator_action",
           source: "orchestrator-action",
           status: "reported",
-          title: "Orchestrator sent follow-up",
+          title: uiText("orchestration.sentFollowUp"),
           ...(typeof details.message === "string"
             ? { detail: truncateEvidenceDetail(details.message) }
             : {}),
@@ -2216,7 +2217,7 @@ function explicitAcceptanceEvidenceFromParentMessage(
       kind: "orchestrator_acceptance",
       source: "orchestrator-accepted",
       status: "accepted",
-      title: "Orchestrator accepted child evidence",
+      title: uiText("orchestration.acceptedEvidence"),
       detail: truncateEvidenceDetail(match[2] || message.text),
       parentSessionId: child.parentSessionId,
       childSessionId: child.childSessionId,
@@ -2241,7 +2242,7 @@ function blockerEvidenceFromChildStatus(
       kind: "blocker",
       source: "blocker",
       status: "blocked",
-      title: "Child thread failed",
+      title: uiText("orchestration.childFailed"),
       detail: child.latestTranscript,
       parentSessionId: child.parentSessionId,
       childSessionId: child.childSessionId,

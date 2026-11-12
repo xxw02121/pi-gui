@@ -118,8 +118,14 @@ ipcRenderer.on(desktopIpc.appCommand, (_event, command: PiDesktopCommand) => {
   appCommands.deliver(command);
 });
 
+const startupLocale = process.env.PI_APP_LOCALE?.trim();
+if (startupLocale) {
+  contextBridge.exposeInMainWorld("__piStartupLocale", startupLocale);
+}
+
 contextBridge.exposeInMainWorld("piApp", {
   platform: process.platform,
+  setUiLocale: (locale: string) => ipcRenderer.send(desktopIpc.setUiLocale, locale),
   drawsWindowControls: process.argv.includes(drawWindowControlsArgument),
   versions: process.versions,
   ping: () => ipcRenderer.invoke(desktopIpc.ping) as Promise<string>,

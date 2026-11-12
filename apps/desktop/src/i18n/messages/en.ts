@@ -5,6 +5,16 @@
  * `t("settings.nav.general")` stays a checked literal.
  */
 import type { PluralCategory, PluralVariantKey } from "../plural";
+import { composerEn } from "./fragments/composer.en";
+import { extensionsEn } from "./fragments/extensions.en";
+import { mainEn } from "./fragments/main.en";
+import { paletteEn } from "./fragments/palette.en";
+import { shellEn } from "./fragments/shell.en";
+import { sidebarEn } from "./fragments/sidebar.en";
+import { tasksEn } from "./fragments/tasks.en";
+import { threadsEn } from "./fragments/threads.en";
+import { timelineEn } from "./fragments/timeline.en";
+import { workbenchEn } from "./fragments/workbench.en";
 
 export const en = {
   "models.enabledCount": "{enabled} of {total}",
@@ -189,7 +199,7 @@ export const en = {
   "settings.appearance.mode.dark": "Dark",
   "settings.appearance.language.title": "Language",
   "settings.appearance.language.description":
-    "Follow the system language, or pick the language pi-gui shows.",
+    "Simplified Chinese by default. Follow the system language, or choose English.",
   "settings.appearance.language.label": "Language",
   "settings.appearance.language.system": "Follow system",
   "settings.appearance.colorPreset.title": "Color preset",
@@ -287,6 +297,21 @@ export const en = {
   "settings.common.remove": "Remove",
   "settings.common.edit": "Edit",
   "settings.common.cancel": "Cancel",
+  "markdown.copy": "Copy",
+  "markdown.copied": "Copied",
+  "markdown.copyCode": "Copy code",
+  "markdown.imageWithAlt": "[image: {alt}]",
+  "markdown.imageBlocked": "[image]",
+  ...shellEn,
+  ...sidebarEn,
+  ...threadsEn,
+  ...composerEn,
+  ...timelineEn,
+  ...workbenchEn,
+  ...paletteEn,
+  ...extensionsEn,
+  ...tasksEn,
+  ...mainEn,
 } as const;
 
 export type MessageKey = keyof typeof en;

@@ -11,7 +11,13 @@ import {
   type MessageKey,
   type Messages,
 } from "../../src/i18n/catalog";
-import { localePreferences, resolveLocale, type LocalePreference } from "../../src/i18n/preference";
+import {
+  defaultLocalePreference,
+  localePreferences,
+  readStoredLocale,
+  resolveLocale,
+  type LocalePreference,
+} from "../../src/i18n/preference";
 import { catalogs, interpolate, resolveMessage, translatorFor } from "../../src/i18n/translate";
 import { en } from "../../src/i18n/messages/en";
 import { zhCN } from "../../src/i18n/messages/zh-CN";
@@ -123,9 +129,14 @@ test("a counted message picks the CLDR plural form of the active locale", () => 
   expect(english("settings.nav.models", { count: 3 })).toBe("Models");
 });
 
-test("the language follows the OS until the user picks one", () => {
+test("an unset preference is Simplified Chinese", () => {
+  expect(defaultLocalePreference).toBe("zh-CN");
+  expect(readStoredLocale()).toBe("zh-CN");
+});
+
+test("the language follows the OS when the preference is system", () => {
   const cases: readonly (readonly [LocalePreference, readonly string[], AppLocale])[] = [
-    // "system" (the default) follows the OS language list, most preferred first.
+    // "system" follows the OS language list, most preferred first.
     ["system", ["zh-CN", "en-US"], "zh-CN"],
     ["system", ["zh-Hans-CN"], "zh-CN"],
     ["system", ["en-US", "zh-CN"], "en"],

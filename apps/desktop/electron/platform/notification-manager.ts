@@ -8,6 +8,7 @@ import { sessionKey } from "@pi-gui/session-driver";
 import type { SessionDriverEvent, SessionRef } from "@pi-gui/session-driver";
 import { getSelectedSession } from "../../contracts/desktop-state";
 import { isSessionActivelyViewed } from "../conversation/session-visibility";
+import { uiText } from "../ui-locale";
 
 const MAX_COMPLETED_RUN_KEYS = 500;
 // An extension that throws on a frequent event repeats the same error notice; notify once per window.
@@ -150,7 +151,7 @@ export class NotificationManager {
       await this.showNotification(
         event.sessionRef,
         event.snapshot.title,
-        "Agent finished responding",
+        uiText("notify.agentFinished"),
       );
       return;
     }
@@ -439,7 +440,7 @@ function requiresAttention(event: Extract<SessionDriverEvent, { type: "hostUiReq
 
 function hostUiBody(event: Extract<SessionDriverEvent, { type: "hostUiRequest" }>): string {
   if (event.request.kind === "notify") {
-    return `${event.request.level === "error" ? "Error" : "Warning"}: ${event.request.message}`;
+    return `${event.request.level === "error" ? uiText("notify.error") : uiText("notify.warning")}: ${event.request.message}`;
   }
   if (
     event.request.kind === "confirm" ||
@@ -448,7 +449,7 @@ function hostUiBody(event: Extract<SessionDriverEvent, { type: "hostUiRequest" }
   ) {
     return event.request.title;
   }
-  return "Needs your input";
+  return uiText("notify.needsInput");
 }
 
 function sameSessionRef(left: SessionRef | undefined, right: SessionRef | undefined): boolean {

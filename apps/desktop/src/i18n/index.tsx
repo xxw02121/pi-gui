@@ -104,6 +104,8 @@ export function I18nProvider({
     document.documentElement.lang = locale;
     // RTL locales set `dir` in the registry; everything else stays left-to-right.
     document.documentElement.dir = textDirectionFor(locale);
+    // Native menus and dialogs live in the main process, which cannot read this profile.
+    window.piApp?.setUiLocale?.(locale);
   }, [locale]);
 
   const value = useMemo<I18nContextValue>(

@@ -14,6 +14,14 @@ export const localePreferences: readonly LocalePreference[] = ["system", ...appL
 
 export const LOCALE_STORAGE_KEY = "pi-gui:locale";
 
+/** Used when the profile has no saved choice. English stays selectable in Settings. */
+export const defaultLocalePreference: LocalePreference = "zh-CN";
+
+function readStartupLocale(): LocalePreference | undefined {
+  const value = (globalThis as { __piStartupLocale?: unknown }).__piStartupLocale;
+  return isLocalePreference(value) ? value : undefined;
+}
+
 export function isLocalePreference(value: unknown): value is LocalePreference {
   return typeof value === "string" && (localePreferences as readonly string[]).includes(value);
 }
@@ -51,11 +59,12 @@ export function resolveLocale(
 export function readStoredLocale(): LocalePreference {
   try {
     const raw = localStorage.getItem(LOCALE_STORAGE_KEY);
-    return isLocalePreference(raw) ? raw : "system";
+    if (isLocalePreference(raw)) return raw;
   } catch {
-    // Reading preferences is best-effort; the system language still applies.
-    return "system";
+    // Reading preferences is best-effort; the product default still applies.
+    return readStartupLocale() ?? defaultLocalePreference;
   }
+  return readStartupLocale() ?? defaultLocalePreference;
 }
 
 export function writeStoredLocale(preference: LocalePreference): void {
