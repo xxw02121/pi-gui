@@ -1,5 +1,6 @@
 import type { ComponentType, ReactNode } from "react";
 import { BUILTIN_TOOL_KINDS, type BuiltinToolKind } from "../../../contracts/workbench";
+import { translate, type MessageKey, type Translate } from "../../i18n/translate";
 import { DiffIcon, FileIcon, TerminalIcon } from "../../ui/icons";
 
 interface BuiltinToolDefinition {
@@ -27,6 +28,26 @@ export const BUILTIN_TOOLS = {
     shortcutKey: "J",
   },
 } as const satisfies Record<BuiltinToolKind, BuiltinToolDefinition>;
+
+const TOOL_LABEL_KEYS = {
+  files: "workbench.tool.files",
+  changes: "workbench.tool.review",
+  terminal: "workbench.tool.terminal",
+} as const satisfies Record<BuiltinToolKind, MessageKey>;
+
+const TOOL_DESCRIPTION_KEYS = {
+  files: "workbench.tool.filesDescription",
+  changes: "workbench.tool.reviewDescription",
+  terminal: "workbench.tool.terminalDescription",
+} as const satisfies Record<BuiltinToolKind, MessageKey>;
+
+export function builtinToolLabel(kind: BuiltinToolKind, t: Translate = translate): string {
+  return t(TOOL_LABEL_KEYS[kind]);
+}
+
+export function builtinToolDescription(kind: BuiltinToolKind, t: Translate = translate): string {
+  return t(TOOL_DESCRIPTION_KEYS[kind]);
+}
 
 /** Chooser order follows the contract's kind list. */
 export const BUILTIN_TOOL_ENTRIES = BUILTIN_TOOL_KINDS.map(

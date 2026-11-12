@@ -8,6 +8,7 @@ import {
 } from "react";
 import type { WorkspaceRecord, WorktreeRecord } from "../../../contracts/desktop-state";
 import type { PiDesktopApi } from "../../../contracts/ipc";
+import { useTranslation } from "../../i18n";
 import { FileEditorPane } from "./file-editor-pane";
 import { FileExplorer } from "./file-explorer";
 import { activateFile, closeFile, openFile, type FileWorkbenchTabs } from "./file-workbench-state";
@@ -29,6 +30,7 @@ export function FileWorkbench({
   tabs,
   onTabsChange,
 }: FileWorkbenchProps) {
+  const { t } = useTranslation();
   const [files, setFiles] = useState<readonly string[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [listError, setListError] = useState<string | null>(null);
@@ -52,7 +54,7 @@ export function FileWorkbench({
             return;
           }
           console.error("[renderer] listWorkspaceFiles failed", error);
-          setListError("Couldn't load files");
+          setListError(t("workbench.files.loadFailed"));
         })
         .finally(() => {
           if (requestIdRef.current !== requestId) {
@@ -61,7 +63,7 @@ export function FileWorkbench({
           setLoading(false);
         });
     },
-    [api, workspace.id],
+    [api, t, workspace.id],
   );
 
   const prevStatusRef = useRef(sessionStatus);

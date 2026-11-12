@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from "react";
 import type { SessionTranscriptPin } from "@pi-gui/session-driver";
 import type { TranscriptMessage } from "../../../contracts/timeline-types";
+import { useTranslation } from "../../i18n";
 import { ExtensionCardItem, type RunExtensionAction } from "../conversation/extension-card";
 import { ChevronDownIcon, ChevronRightIcon, CloseIcon } from "../../ui/icons";
 import { focusComposerAfter } from "./focus-composer";
@@ -70,6 +71,7 @@ export function PinnedCards({
   readonly onDismiss: (pin: PinnedCard) => void;
   readonly onAction: RunExtensionAction;
 }) {
+  const { t } = useTranslation();
   if (pins.length === 0) return null;
   return (
     <div className="pinned-cards" data-testid="pinned-cards">
@@ -87,10 +89,19 @@ export function PinnedCards({
                 {canCollapse ? (
                   <button
                     aria-expanded={!collapsed}
-                    aria-label={`${collapsed ? "Expand" : "Collapse"} ${pin.card.title}`}
+                    aria-label={t(
+                      collapsed ? "extensions.pinned.expand" : "extensions.pinned.collapse",
+                      {
+                        name: pin.card.title,
+                      },
+                    )}
                     className="pinned-card__control icon-button"
                     data-testid="pinned-card-toggle"
-                    title={collapsed ? "Expand" : "Collapse"}
+                    title={t(
+                      collapsed
+                        ? "extensions.pinned.expandTitle"
+                        : "extensions.pinned.collapseTitle",
+                    )}
                     type="button"
                     onClick={() => onToggle(pin)}
                   >
@@ -98,10 +109,10 @@ export function PinnedCards({
                   </button>
                 ) : null}
                 <button
-                  aria-label={`Hide ${pin.card.title}`}
+                  aria-label={t("extensions.pinned.hide", { name: pin.card.title })}
                   className="pinned-card__control icon-button"
                   data-testid="pinned-card-dismiss"
-                  title="Hide until it changes"
+                  title={t("extensions.pinned.hideUntilChanges")}
                   type="button"
                   onClick={(event) => focusComposerAfter(event.currentTarget, () => onDismiss(pin))}
                 >

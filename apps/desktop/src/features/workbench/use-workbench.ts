@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState, type SetStateAction } from "r
 import type { SessionRef } from "@pi-gui/session-driver/types";
 import type { PiDesktopApi } from "../../../contracts/ipc";
 import type { TaskWorkbenchTemplate, ToolRef } from "../../../contracts/workbench";
+import { useTranslation } from "../../i18n";
 import type { FileWorkbenchTabs } from "./file-workbench-state";
 import {
   activeWorkbenchTool,
@@ -27,7 +28,6 @@ interface UseWorkbenchOptions {
 }
 
 let saveSequence = 0;
-const SAVE_ERROR = "Couldn't save tool tabs. They are kept in this window.";
 
 function targetKey(target: SessionRef): string {
   return JSON.stringify([target.workspaceId, target.sessionId]);
@@ -35,6 +35,7 @@ function targetKey(target: SessionRef): string {
 
 /** Each window owns this map. Host templates are read once, never subscribed to as live state. */
 export function useWorkbench({ api, target }: UseWorkbenchOptions) {
+  const { t } = useTranslation();
   const entries = useRef(new Map<string, WorkbenchEntry>());
   const pendingRestores = useRef(new Set<string>());
   const mounted = useRef(true);
@@ -80,22 +81,23 @@ export function useWorkbench({ api, target }: UseWorkbenchOptions) {
       // Capture the target and value now. A task switch cannot redirect a delayed save.
       // Main serializes disk writes. Dispatch immediately so a slow write cannot delay this
       // window's next gesture until after a newer gesture made in another window.
+      const saveFailed = t("workbench.tabs.saveFailed");
       void desktopApi.saveTaskWorkbenchTemplate({ target: ref, template, sequence }).then(
         () => {
-          if (entry.latestSave === sequence && entry.error === SAVE_ERROR) {
+          if (entry.latestSave === sequence && entry.error === saveFailed) {
             entry.error = "";
             publish();
           }
         },
         () => {
           if (entry.latestSave === sequence) {
-            entry.error = SAVE_ERROR;
+            entry.error = saveFailed;
             publish();
           }
         },
       );
     },
-    [publish],
+    [publish, t],
   );
 
   const restore = useCallback(
@@ -112,7 +114,7 @@ export function useWorkbench({ api, target }: UseWorkbenchOptions) {
       void desktopApi.getTaskWorkbenchTemplate(ref).then(
         (saved) => {
           const hasPendingActions = entry.pendingActions.length > 0;
-          const restored = restoreWorkbenchView(entry.initialView, saved, entry.pendingActions);
+          const restored = restoreWorkbenchView(entry.initialView, saved, entry.pendingActions, t);
           entry.view = restored.view;
           entry.error = restored.error;
           entry.pendingActions = [];
@@ -124,13 +126,13 @@ export function useWorkbench({ api, target }: UseWorkbenchOptions) {
         },
         () => {
           entry.restore = "failed";
-          entry.error = "Couldn't restore saved tool tabs. Your current tabs are still available.";
+          entry.error = t("workbench.tabs.restoreFailed");
           pendingRestores.current.delete(key);
           publish();
         },
       );
     },
-    [ensureEntry, persist, publish],
+    [ensureEntry, persist, publish, t],
   );
 
   const workspaceId = target?.workspaceId;
@@ -142,7 +144,7 @@ export function useWorkbench({ api, target }: UseWorkbenchOptions) {
   const apply = useCallback(
     (ref: SessionRef, actions: readonly WorkbenchAction[]) => {
       const entry = ensureEntry(ref);
-      const result = applyWorkbenchActions(entry.view, actions);
+      const result = applyWorkbenchActions(entry.view, actions, t);
       const next = result.view;
       if (result.error) {
         entry.error = result.error;
@@ -159,7 +161,7 @@ export function useWorkbench({ api, target }: UseWorkbenchOptions) {
       publish();
       persist(ref, entry);
     },
-    [ensureEntry, persist, publish],
+    [ensureEntry, persist, publish, t],
   );
 
   const dispatch = useCallback(

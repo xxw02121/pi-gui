@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 import type { HostUiResponse } from "@pi-gui/session-driver";
+import { useTranslation } from "../../i18n";
+import { translate } from "../../i18n/translate";
 import { trapDialogFocus } from "../../ui/dialog-focus";
 import { focusComposerAfter } from "./focus-composer";
 import { ChevronDownIcon, ChevronRightIcon, CloseIcon } from "../../ui/icons";
@@ -10,7 +12,9 @@ import type {
 
 const ANSI_ESCAPE_PATTERN = /\u001B\[[0-?]*[ -/]*[@-~]/g;
 const DOCK_SEGMENT_SEPARATOR = "--------------------";
-const GENERIC_ACTIVE_LABEL = "Extension UI active";
+function genericActiveLabel(): string {
+  return translate("extensions.dock.generic");
+}
 
 interface ExtensionDockBlock {
   readonly key: string;
@@ -101,6 +105,9 @@ export function ExtensionDock({
   readonly onToggle: () => void;
   readonly onDismiss?: () => void;
 }) {
+  const { t } = useTranslation();
+  const summary =
+    dock.summaryText === genericActiveLabel() ? t("extensions.dock.generic") : dock.summaryText;
   return (
     <div
       className={`extension-dock ${expanded ? "extension-dock--expanded" : ""}`}
@@ -112,12 +119,12 @@ export function ExtensionDock({
           aria-expanded={expanded}
           className="extension-dock__toggle"
           data-testid="extension-dock-toggle"
-          title={dock.summaryText}
+          title={summary}
           type="button"
           onClick={onToggle}
         >
           <span className="extension-dock__summary" data-testid="extension-dock-summary">
-            {dock.summaryText}
+            {summary}
           </span>
           <span className="extension-dock__chevron" aria-hidden="true">
             {expanded ? <ChevronDownIcon /> : <ChevronRightIcon />}
@@ -125,10 +132,10 @@ export function ExtensionDock({
         </button>
         {onDismiss ? (
           <button
-            aria-label="Hide extension status"
+            aria-label={t("extensions.dock.hide")}
             className="extension-dock__dismiss icon-button"
             data-testid="extension-dock-dismiss"
-            title="Hide until the extension changes it"
+            title={t("extensions.dock.hideUntilChanges")}
             type="button"
             onClick={(event) => focusComposerAfter(event.currentTarget, onDismiss)}
           >
@@ -156,6 +163,7 @@ export function ExtensionDialog({
   readonly dialog: SessionExtensionDialogRecord;
   readonly onRespond: (response: HostUiResponse) => void;
 }) {
+  const { t } = useTranslation();
   const [draft, setDraft] = useState("");
   const titleId = useId();
   const bodyId = useId();
@@ -254,7 +262,7 @@ export function ExtensionDialog({
           <input
             autoFocus
             className="skills-search"
-            placeholder={dialog.placeholder ?? "Enter a value"}
+            placeholder={dialog.placeholder ?? t("extensions.dialog.placeholder")}
             value={draft}
             onChange={(event) => setDraft(event.target.value)}
           />
@@ -277,7 +285,7 @@ export function ExtensionDialog({
             type="button"
             onClick={respondWithCancel}
           >
-            Cancel
+            {t("extensions.dialog.cancel")}
           </button>
           {dialog.kind === "confirm" ? (
             <button
@@ -286,7 +294,7 @@ export function ExtensionDialog({
               type="button"
               onClick={respondWithSubmit}
             >
-              Confirm
+              {t("extensions.dialog.confirm")}
             </button>
           ) : null}
           {dialog.kind === "input" || dialog.kind === "editor" ? (
@@ -296,7 +304,7 @@ export function ExtensionDialog({
               type="button"
               onClick={respondWithSubmit}
             >
-              Submit
+              {t("extensions.dialog.submit")}
             </button>
           ) : null}
         </div>
@@ -336,7 +344,7 @@ function resolveDockSummaryText(
     }
   }
 
-  return GENERIC_ACTIVE_LABEL;
+  return genericActiveLabel();
 }
 
 function buildDockBodyText(
